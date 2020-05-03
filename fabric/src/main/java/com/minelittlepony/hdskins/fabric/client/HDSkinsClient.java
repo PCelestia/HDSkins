@@ -3,7 +3,7 @@ package com.minelittlepony.hdskins.fabric.client;
 import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.fabric.HDSkins;
 import com.minelittlepony.hdskins.fabric.mixin.client.IMixinPlayerListEntry;
-import com.minelittlepony.hdskins.skins.SkinCache;
+import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -47,7 +47,7 @@ public class HDSkinsClient implements ClientModInitializer {
     public void onClientLogin(ClientPlayerEntity player) {
         if (player != null) {
             replaceNetworkPlayerMap(player.networkHandler);
-            logger.info("Replaced ClientPlayNetHandler.playerInfoMap");
+            logger.info("Replaced ClientPlayNetworkHandler.playerListEntries");
         }
 
         pendingSkins.clear();
@@ -66,6 +66,7 @@ public class HDSkinsClient implements ClientModInitializer {
     }
 
     private void loadSkins(PlayerListEntry player, Map<Type, MinecraftProfileTexture> textures) {
+        logger.debug("Loaded skins for {}: {}", player.getProfile().getName(), textures);
         RenderSystem.recordRenderCall(() -> {
             for (Type textureType : Type.values()) {
                 if (textures.containsKey(textureType)) {
@@ -79,18 +80,18 @@ public class HDSkinsClient implements ClientModInitializer {
     private void loadSkin(MinecraftProfileTexture profileTexture, Type textureType, @Nullable Callback callback) {
         TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
         String textureName = Hashing.sha1().hashUnencodedChars(profileTexture.getHash()).toString();
-        Identifier resourcelocation = new Identifier("hdskins", "skins/" + textureName);
-        AbstractTexture texture = textureManager.getTexture(resourcelocation);
+        Identifier textureId = new Identifier("hdskins", "skins/" + textureName);
+        AbstractTexture texture = textureManager.getTexture(textureId);
         if (texture != null) {
             if (callback != null) {
-                callback.onSkinAvailable(resourcelocation);
+                callback.onSkinAvailable(textureId);
             }
         } else {
             String prefix = textureName.length() > 2 ? textureName.substring(0, 2) : "xx";
             Path path = assetsDir().resolve("hdskins").resolve(prefix).resolve(textureName);
-            textureManager.registerTexture(resourcelocation, new HDPlayerSkinTexture(path.toFile(), profileTexture.getUrl(), DefaultSkinHelper.getTexture(), textureType == Type.SKIN, () -> {
+            textureManager.registerTexture(textureId, new HDPlayerSkinTexture(path.toFile(), profileTexture.getUrl(), DefaultSkinHelper.getTexture(), textureType == Type.SKIN, () -> {
                 if (callback != null) {
-                    callback.onSkinAvailable(resourcelocation);
+                    callback.onSkinAvailable(textureId);
                 }
             }));
         }
@@ -103,6 +104,7 @@ public class HDSkinsClient implements ClientModInitializer {
     private boolean setPlayerSkin(PendingSkin skin) {
         IMixinPlayerListEntry playerEntry = (IMixinPlayerListEntry) skin.player;
         if (playerEntry.isTexturesLoaded()) {
+            logger.debug("Setting {} for {} to {}.", skin.type, skin.player.getProfile().getName(), skin.identifier);
             playerEntry.getTextures().put(skin.type, skin.identifier);
             if (skin.type == Type.SKIN) {
                 playerEntry.setModel(skin.texture.getMetadata("model"));

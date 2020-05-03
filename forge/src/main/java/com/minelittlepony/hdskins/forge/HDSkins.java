@@ -1,7 +1,7 @@
 package com.minelittlepony.hdskins.forge;
 
 import com.minelittlepony.hdskins.forge.client.HDSkinsClientEvents;
-import com.minelittlepony.hdskins.skins.SkinServerList;
+import com.minelittlepony.hdskins.common.skins.SkinServerList;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -37,7 +37,7 @@ public class HDSkins {
 
     private void commonSetup(FMLCommonSetupEvent event) {
 
-        skinServers = new SkinServerList(FMLPaths.CONFIGDIR.get().resolve("skinservers.json"));
+        skinServers = new SkinServerList(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
         try {
             try {
                 skinServers.loadJson();

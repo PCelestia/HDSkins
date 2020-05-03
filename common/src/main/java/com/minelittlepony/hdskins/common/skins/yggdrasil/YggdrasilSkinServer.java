@@ -1,12 +1,12 @@
-package com.minelittlepony.hdskins.skins.yggdrasil;
+package com.minelittlepony.hdskins.common.skins.yggdrasil;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.minelittlepony.hdskins.skins.Feature;
-import com.minelittlepony.hdskins.skins.MoreHttpResponses;
-import com.minelittlepony.hdskins.skins.Session;
-import com.minelittlepony.hdskins.skins.SkinServer;
-import com.minelittlepony.hdskins.skins.SkinRequest;
+import com.minelittlepony.hdskins.common.skins.Feature;
+import com.minelittlepony.hdskins.common.skins.MoreHttpResponses;
+import com.minelittlepony.hdskins.common.skins.Session;
+import com.minelittlepony.hdskins.common.skins.SkinServer;
+import com.minelittlepony.hdskins.common.skins.SkinRequest;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.InsecureTextureException;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class YggdrasilSkinServer implements SkinServer {
+class YggdrasilSkinServer implements SkinServer {
 
     private static final Set<Feature> FEATURES = Sets.newHashSet(
             Feature.SYNTHETIC,

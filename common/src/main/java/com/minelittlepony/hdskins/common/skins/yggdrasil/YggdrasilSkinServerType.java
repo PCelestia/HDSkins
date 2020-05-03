@@ -1,6 +1,6 @@
-package com.minelittlepony.hdskins.skins.yggdrasil;
+package com.minelittlepony.hdskins.common.skins.yggdrasil;
 
-import com.minelittlepony.hdskins.skins.SkinServerType;
+import com.minelittlepony.hdskins.common.skins.SkinServerType;
 
 import java.lang.reflect.Type;
 

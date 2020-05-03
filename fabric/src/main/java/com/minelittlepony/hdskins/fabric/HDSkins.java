@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.fabric;
 
-import com.minelittlepony.hdskins.skins.SkinServerList;
+import com.minelittlepony.hdskins.common.skins.SkinServerList;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +30,7 @@ public final class HDSkins implements ModInitializer {
     @Override
     public void onInitialize() {
         Path configDir = FabricLoader.getInstance().getConfigDirectory().toPath();
-        skinServers = new SkinServerList(configDir.resolve("skinservers.json"));
+        skinServers = new SkinServerList(configDir.resolve(MOD_ID));
         try {
             try {
                 skinServers.loadJson();

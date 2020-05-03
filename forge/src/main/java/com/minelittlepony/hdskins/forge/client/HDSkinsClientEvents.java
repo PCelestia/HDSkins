@@ -2,7 +2,7 @@ package com.minelittlepony.hdskins.forge.client;
 
 import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.forge.HDSkins;
-import com.minelittlepony.hdskins.skins.SkinCache;
+import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;

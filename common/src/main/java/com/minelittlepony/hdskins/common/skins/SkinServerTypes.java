@@ -1,7 +1,7 @@
-package com.minelittlepony.hdskins.skins;
+package com.minelittlepony.hdskins.common.skins;
 
-import com.minelittlepony.hdskins.skins.valhalla.ValhallaSkinServerType;
-import com.minelittlepony.hdskins.skins.yggdrasil.YggdrasilSkinServerType;
+import com.minelittlepony.hdskins.common.skins.valhalla.ValhallaSkinServerType;
+import com.minelittlepony.hdskins.common.skins.yggdrasil.YggdrasilSkinServerType;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

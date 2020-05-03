@@ -18,16 +18,7 @@ minecraft {
                     sources = [sourceSets.main, commonProject.sourceSets.main]
                 }
             }
-        }
-        server {
-            workingDirectory = file("run").absolutePath
-            property "forge.logging.console.level", "info"
-
-            mods {
-                hdskins {
-                    sources = [sourceSets.main, commonProject.sourceSets.main]
-                }
-            }
+            ideaModule = "${rootProject.name}.${project.name}.main"
         }
     }
 }

@@ -1,15 +1,15 @@
-package com.minelittlepony.hdskins.skins.valhalla;
+package com.minelittlepony.hdskins.common.skins.valhalla;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.minelittlepony.hdskins.skins.Feature;
-import com.minelittlepony.hdskins.skins.MoreHttpResponses;
-import com.minelittlepony.hdskins.skins.Session;
-import com.minelittlepony.hdskins.skins.SkinServer;
-import com.minelittlepony.hdskins.skins.SkinRequest;
+import com.minelittlepony.hdskins.common.skins.Feature;
+import com.minelittlepony.hdskins.common.skins.MoreHttpResponses;
+import com.minelittlepony.hdskins.common.skins.Session;
+import com.minelittlepony.hdskins.common.skins.SkinServer;
+import com.minelittlepony.hdskins.common.skins.SkinRequest;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class ValhallaSkinServer implements SkinServer {
+class ValhallaSkinServer implements SkinServer {
 
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())

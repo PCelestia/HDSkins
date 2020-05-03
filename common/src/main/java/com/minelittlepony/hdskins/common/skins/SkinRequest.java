@@ -1,4 +1,4 @@
-package com.minelittlepony.hdskins.skins;
+package com.minelittlepony.hdskins.common.skins;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 
