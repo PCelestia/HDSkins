@@ -1,0 +1,44 @@
+plugins {
+    id 'java-library'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven {
+        url = "https://libraries.minecraft.net"
+        name = "Minecraft"
+    }
+}
+
+configurations {
+    include
+    api.extendsFrom include
+}
+
+dependencies {
+    include "org.apache.httpcomponents:httpmime:4.3.2"
+    api "org.apache.logging.log4j:log4j-api:2.11.2"
+    api "com.google.code.gson:gson:2.8.0"
+    api "com.google.guava:guava:21.0"
+    api "com.mojang:authlib:1.5.25"
+
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+}
+
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.include]
+    dependencies {
+        exclude it.dependency("org.apache.httpcomponents:httpclient")
+        exclude it.dependency("org.apache.httpcomponents:httpcore")
+        exclude it.dependency("commons-codec:commons-codec")
+        exclude it.dependency("commons-logging:commons-logging")
+    }
+    relocate "org/apache/http/entity/mime", "com.minelittlepony/org/apache/hdskins/http/entity/mime"
+}
+
+artifacts {
+    archives shadowJar
+}

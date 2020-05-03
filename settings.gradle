@@ -1,13 +1,2 @@
-pluginManagement {
-    repositories {
-        jcenter()
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
-        gradlePluginPortal()
-    }
-}
 rootProject.name = 'HDSkins'
-// Checkout to parent dir to dev both
-//includeBuild '../Kirin'
+include 'common', 'forge', 'fabric'

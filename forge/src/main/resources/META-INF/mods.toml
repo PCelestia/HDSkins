@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[31,)"
+
+[[mods]]
+modId="hdskins"
+version="${file.jarVersion}"
+displayName="HDSkins"
+authors="killjoy1221, Sollace, Mumfrey"
+description='''
+High Definitions skins and custom skin servers.
+
+Second line
+'''
+
+[[dependencies.hdskins]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31.1,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.hdskins]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"

@@ -1,0 +1,38 @@
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle'
+}
+def commonProject = rootProject.project(":common")
+
+minecraft {
+    mappings channel: "snapshot", version: "20200502-1.15.1"
+    accessTransformer file("src/main/resources/META-INF/accesstransformer.cfg")
+
+    runs {
+        client {
+            workingDirectory = file("run").absolutePath
+            property "forge.logging.console.level", "info"
+
+            mods {
+                hdskins {
+                    sources = [sourceSets.main, commonProject.sourceSets.main]
+                }
+            }
+        }
+        server {
+            workingDirectory = file("run").absolutePath
+            property "forge.logging.console.level", "info"
+
+            mods {
+                hdskins {
+                    sources = [sourceSets.main, commonProject.sourceSets.main]
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:1.15.2-31.1.0"
+    api commonProject
+}
