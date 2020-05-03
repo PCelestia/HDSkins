@@ -1,15 +1,16 @@
 package com.minelittlepony.hdskins.skins;
 
 import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -17,9 +18,12 @@ import java.util.Set;
 @JsonAdapter(SkinServerSerializer.class)
 public interface SkinServer {
 
-    TypeToken<Map<Type, MinecraftProfileTexture>> PROFILE_TEXTURE_TOKEN = new TypeToken<Map<Type, MinecraftProfileTexture>>() {};
-
-    CloseableHttpClient HTTP_CLIENT = HttpClients.createSystem();
+    CloseableHttpClient HTTP_CLIENT = HttpClients.custom()
+            .useSystemProperties()
+            .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                    HttpsURLConnection.getDefaultSSLSocketFactory(),
+                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER)
+            ).build();
 
     /**
      * Returns true for any features that this skin server supports.

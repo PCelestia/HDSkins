@@ -17,7 +17,7 @@ import java.nio.file.NoSuchFileException;
 @Mod(HDSkins.MOD_ID)
 public class HDSkins {
 
-    public static final String MOD_ID = "hdskisn";
+    public static final String MOD_ID = "hdskins";
 
     private static final Logger logger = LogManager.getLogger();
 

@@ -46,7 +46,7 @@ public class SkinCache {
                 try {
                     server.loadProfileData(sessionService, profile).forEach(textures::putIfAbsent);
                 } catch (IOException e) {
-                    logger.warn(e);
+                    logger.error("Failed to get texture data from {}.", server, e);
                 }
             }
 
