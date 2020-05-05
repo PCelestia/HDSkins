@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.fabric.mixin.client;
 
-import com.minelittlepony.hdskins.fabric.client.InitScreenCallback;
+import com.minelittlepony.hdskins.fabric.client.callbacks.InitScreenCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;

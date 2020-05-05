@@ -1,6 +1,7 @@
 package com.minelittlepony.hdskins.fabric.client;
 
 import com.google.common.collect.ForwardingMap;
+import com.minelittlepony.hdskins.fabric.client.callbacks.AddPlayerCallback;
 import net.minecraft.client.network.PlayerListEntry;
 
 import java.util.Map;

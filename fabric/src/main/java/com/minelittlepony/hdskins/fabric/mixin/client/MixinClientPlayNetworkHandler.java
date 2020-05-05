@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.fabric.mixin.client;
 
-import com.minelittlepony.hdskins.fabric.client.ClientLogInCallback;
+import com.minelittlepony.hdskins.fabric.client.callbacks.ClientLogInCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.packet.GameJoinS2CPacket;

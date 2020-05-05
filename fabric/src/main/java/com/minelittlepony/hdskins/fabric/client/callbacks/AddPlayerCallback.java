@@ -1,4 +1,4 @@
-package com.minelittlepony.hdskins.fabric.client;
+package com.minelittlepony.hdskins.fabric.client.callbacks;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
