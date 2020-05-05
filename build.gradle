@@ -45,14 +45,13 @@ sourceSets {
 }
 
 jar {
-    subprojects.each {
-        dependsOn it.build
-//        from zipTree(it.jar.outputs.files.singleFile)
-    }
+    dependsOn project("common").shadowJar
     from(zipTree(project("common").shadowJar.outputs.files.singleFile)) {
         exclude 'fabric.mod.json'
     }
+    dependsOn project("forge").reobfJar
     from zipTree(project("forge").jar.outputs.files.singleFile)
+    dependsOn project("fabric").remapJar
     from zipTree(project("fabric").remapJar.outputs.files.singleFile)
 
     from 'LICENSE'
