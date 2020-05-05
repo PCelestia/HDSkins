@@ -3,11 +3,14 @@ package com.minelittlepony.hdskins.fabric.client.gui;
 import com.minelittlepony.hdskins.common.gui.IButton;
 import com.minelittlepony.hdskins.common.gui.ILabel;
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import com.minelittlepony.hdskins.common.gui.PathList;
 import com.minelittlepony.hdskins.common.gui.Widgets;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.arguments.ItemStackArgumentType;
@@ -25,6 +28,8 @@ public abstract class AbstractYarnWidgets implements Drawable, Widgets {
     protected abstract TextRenderer getTextRenderer();
 
     protected abstract <B extends AbstractButtonWidget> B addButton(B button);
+
+    protected abstract List<Element> children();
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
@@ -59,5 +64,12 @@ public abstract class AbstractYarnWidgets implements Drawable, Widgets {
     @Override
     public ITextField addTextField(int x, int y, int w, int h, String text) {
         return new YarnTextField(addButton(new TextFieldWidget(getTextRenderer(), x, y, w, h, text)));
+    }
+
+    @Override
+    public PathList addPathList(int widthIn, int heightIn, int topIn, int bottomIn) {
+        YarnPathList list = new YarnPathList(MinecraftClient.getInstance(), widthIn, heightIn, topIn, bottomIn);
+        children().add(list);
+        return list;
     }
 }

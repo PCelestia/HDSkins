@@ -32,4 +32,6 @@ public interface Widgets {
     }
 
     ITextField addTextField(int x, int y, int w, int h, String text);
+
+    PathList addPathList(int widthIn, int heightIn, int topIn, int bottomIn);
 }

@@ -4,9 +4,12 @@ import com.minelittlepony.hdskins.common.gui.IScreen;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.forge.client.gui.AbstractMCPWidgets;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.TranslationTextComponent;
+
+import java.util.List;
 
 public class MCPScreenWrapper extends Screen {
 
@@ -27,10 +30,10 @@ public class MCPScreenWrapper extends Screen {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.renderBackground();
-        super.render(mouseX, mouseY, delta);
 
-        screenHelper.render(mouseX, mouseY, delta);
         screen.render(mouseX, mouseY, delta);
+        super.render(mouseX, mouseY, delta);
+        screenHelper.render(mouseX, mouseY, delta);
 
         this.buttons.stream()
                 .filter(Widget::isHovered)
@@ -57,6 +60,11 @@ public class MCPScreenWrapper extends Screen {
         @Override
         protected <B extends Widget> B addButton(B button) {
             return MCPScreenWrapper.this.addButton(button);
+        }
+
+        @Override
+        protected List<IGuiEventListener> children() {
+            return MCPScreenWrapper.this.children;
         }
 
         @Override

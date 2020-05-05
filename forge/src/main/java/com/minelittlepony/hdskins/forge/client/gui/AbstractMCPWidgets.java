@@ -3,10 +3,13 @@ package com.minelittlepony.hdskins.forge.client.gui;
 import com.minelittlepony.hdskins.common.gui.IButton;
 import com.minelittlepony.hdskins.common.gui.ILabel;
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import com.minelittlepony.hdskins.common.gui.PathList;
 import com.minelittlepony.hdskins.common.gui.Widgets;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
@@ -25,6 +28,8 @@ public abstract class AbstractMCPWidgets implements IRenderable, Widgets {
     protected abstract FontRenderer getTextRenderer();
 
     protected abstract <B extends Widget> B addButton(B button);
+
+    protected abstract List<IGuiEventListener> children();
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
@@ -59,5 +64,12 @@ public abstract class AbstractMCPWidgets implements IRenderable, Widgets {
     @Override
     public ITextField addTextField(int x, int y, int w, int h, String text) {
         return new MCPTextField(addButton(new TextFieldWidget(getTextRenderer(), x, y, w, h, text)));
+    }
+
+    @Override
+    public PathList addPathList(int widthIn, int heightIn, int topIn, int bottomIn) {
+        MCPPathList list = new MCPPathList(Minecraft.getInstance(), widthIn, heightIn, topIn, bottomIn);
+        children().add(list);
+        return list;
     }
 }

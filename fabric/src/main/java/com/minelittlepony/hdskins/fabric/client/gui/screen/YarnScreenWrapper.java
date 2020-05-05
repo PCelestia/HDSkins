@@ -4,9 +4,12 @@ import com.minelittlepony.hdskins.common.gui.IScreen;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.fabric.client.gui.AbstractYarnWidgets;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.text.TranslatableText;
+
+import java.util.List;
 
 public class YarnScreenWrapper extends Screen {
 
@@ -27,10 +30,10 @@ public class YarnScreenWrapper extends Screen {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.renderBackground();
-        super.render(mouseX, mouseY, delta);
 
-        screenHelper.render(mouseX, mouseY, delta);
         screen.render(mouseX, mouseY, delta);
+        super.render(mouseX, mouseY, delta);
+        screenHelper.render(mouseX, mouseY, delta);
 
         this.buttons.stream()
                 .filter(AbstractButtonWidget::isHovered)
@@ -57,6 +60,11 @@ public class YarnScreenWrapper extends Screen {
         @Override
         protected <B extends AbstractButtonWidget> B addButton(B button) {
             return YarnScreenWrapper.this.addButton(button);
+        }
+
+        @Override
+        protected List<Element> children() {
+            return YarnScreenWrapper.this.children;
         }
 
         @Override

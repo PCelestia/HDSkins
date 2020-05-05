@@ -2,12 +2,14 @@ package com.minelittlepony.hdskins.common.gui.screen;
 
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.IButton;
+import com.minelittlepony.hdskins.common.gui.PathList;
 import com.minelittlepony.hdskins.common.skins.Feature;
 import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import org.apache.logging.log4j.LogManager;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -26,6 +28,7 @@ public class SkinUploadScreen extends CustomScreen {
     private IButton btnModeAlex;
     private IButton btnModeSkin;
     private IButton btnModeElytra;
+    private PathList pathList;
 
     public SkinUploadScreen(Uploader uploader, Function<Consumer<List<Path>>, FileDrop> dropper) {
         super("hdskins.gui.title");
@@ -65,7 +68,17 @@ public class SkinUploadScreen extends CustomScreen {
         btnModeElytra = screen.addButtonIcon(screen.getWidth() - 25, 94, "elytra",
                 "hdskins.mode.elytra", this::setElytraMode);
 
+        pathList = screen.addPathList(screen.getWidth()/2 - 60, screen.getHeight(), 64, screen.getHeight() - 64);
+        pathList.setLeft(20);
+        pathList.addPath(Paths.get("foobar1"));
+        pathList.addPath(Paths.get("foobar2"));
+        pathList.addPath(Paths.get("foobar3"));
         updateButtons();
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
+        pathList.render(mouseX, mouseY, delta);
     }
 
     private void setSkinMode(IButton iButton) {
