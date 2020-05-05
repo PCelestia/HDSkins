@@ -39,7 +39,7 @@ evaluationDependsOnChildren()
 
 sourceSets {
     old {
-        java.srcDir "oldSrc/main/java"
+//        java.srcDir "oldSrc/main/java"
         resources.srcDir "oldSrc/main/resources"
     }
 }
@@ -49,7 +49,9 @@ jar {
         dependsOn it.build
 //        from zipTree(it.jar.outputs.files.singleFile)
     }
-    from zipTree(project("common").shadowJar.outputs.files.singleFile)
+    from(zipTree(project("common").shadowJar.outputs.files.singleFile)) {
+        exclude 'fabric.mod.json'
+    }
     from zipTree(project("forge").jar.outputs.files.singleFile)
     from zipTree(project("fabric").remapJar.outputs.files.singleFile)
 

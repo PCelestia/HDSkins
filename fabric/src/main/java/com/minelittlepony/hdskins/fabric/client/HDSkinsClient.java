@@ -1,9 +1,14 @@
 package com.minelittlepony.hdskins.fabric.client;
 
 import com.google.common.hash.Hashing;
-import com.minelittlepony.hdskins.fabric.HDSkins;
-import com.minelittlepony.hdskins.fabric.mixin.client.IMixinPlayerListEntry;
+import com.minelittlepony.hdskins.common.file.FileDrop;
+import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
+import com.minelittlepony.hdskins.common.skins.Session;
 import com.minelittlepony.hdskins.common.skins.SkinCache;
+import com.minelittlepony.hdskins.common.upload.Uploader;
+import com.minelittlepony.hdskins.fabric.HDSkins;
+import com.minelittlepony.hdskins.fabric.client.gui.screen.YarnScreenWrapper;
+import com.minelittlepony.hdskins.fabric.mixin.client.IMixinPlayerListEntry;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,6 +16,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -30,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class HDSkinsClient implements ClientModInitializer {
     private static final Logger logger = LogManager.getLogger();
@@ -42,6 +52,7 @@ public class HDSkinsClient implements ClientModInitializer {
         AddPlayerCallback.EVENT.register(this::onPlayerAdd);
         ClientLogInCallback.EVENT.register(this::onClientLogin);
         ClientTickCallback.EVENT.register(this::onTick);
+        InitScreenCallback.EVENT.register(this::onScreenInit);
     }
 
     public void onClientLogin(ClientPlayerEntity player) {
@@ -115,6 +126,23 @@ public class HDSkinsClient implements ClientModInitializer {
             return true;
         }
         return false;
+    }
+
+    private void onScreenInit(Screen screen, Consumer<AbstractButtonWidget> addButton) {
+        if (screen instanceof TitleScreen) {
+            addButton.accept(new ButtonWidget(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
+                MinecraftClient mc = MinecraftClient.getInstance();
+                mc.openScreen(new YarnScreenWrapper(new SkinUploadScreen(
+                        new Uploader(HDSkins.instance().getSkinServers().getSkinServers().get(0),
+                                sessionFromVanilla(mc.getSession()), mc.getSessionService()),
+                        (a) -> new FileDrop(mc, mc.getWindow()::getHandle, a)
+                )));
+            }));
+        }
+    }
+
+    private static Session sessionFromVanilla(net.minecraft.client.util.Session session) {
+        return new Session(session.getAccessToken(), session.getProfile());
     }
 
     private static Path assetsDir() {

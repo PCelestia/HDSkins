@@ -1,8 +1,13 @@
 package com.minelittlepony.hdskins.forge.client;
 
 import com.google.common.hash.Hashing;
+import com.minelittlepony.hdskins.common.file.FileDrop;
+import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
+import com.minelittlepony.hdskins.common.skins.Session;
+import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.minelittlepony.hdskins.forge.HDSkins;
 import com.minelittlepony.hdskins.common.skins.SkinCache;
+import com.minelittlepony.hdskins.forge.client.gui.screen.MCPScreenWrapper;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,6 +15,9 @@ import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.network.play.NetworkPlayerInfo;
 import net.minecraft.client.renderer.texture.Texture;
@@ -17,6 +25,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -92,7 +101,6 @@ public class HDSkinsClientEvents {
         }
     }
 
-
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
@@ -112,6 +120,25 @@ public class HDSkinsClientEvents {
             return true;
         }
         return false;
+    }
+
+    @SubscribeEvent
+    public void onScreenInit(GuiScreenEvent.InitGuiEvent event) {
+        if (event.getGui() instanceof MainMenuScreen) {
+            Screen screen = event.getGui();
+            event.addWidget(new Button(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
+                Minecraft mc = Minecraft.getInstance();
+                mc.displayGuiScreen(new MCPScreenWrapper(new SkinUploadScreen(
+                        new Uploader(HDSkins.instance().getSkinServers().getSkinServers().get(0),
+                                sessionFromVanilla(mc.getSession()), mc.getSessionService()),
+                        (a) -> new FileDrop(mc, mc.getMainWindow()::getHandle, a)
+                )));
+            }));
+        }
+    }
+
+    private static Session sessionFromVanilla(net.minecraft.util.Session session) {
+        return new Session(session.getToken(), session.getProfile());
     }
 
     private static Path assetsDir() {
