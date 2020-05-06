@@ -17,6 +17,7 @@ public class YarnPathList extends AlwaysSelectedEntryListWidget<YarnPathList.Pat
     @Override
     public void clear() {
         this.clearEntries();
+        this.setScrollAmount(0);
     }
 
     @Override

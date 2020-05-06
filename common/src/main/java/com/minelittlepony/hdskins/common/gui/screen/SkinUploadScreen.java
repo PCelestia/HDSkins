@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -84,15 +85,12 @@ public class SkinUploadScreen extends CustomScreen {
 
     private void onDirectory(@Nullable Path directory, Stream<Path> children) {
         pathList.clear();
-        this.currentDirectory = directory;
+        currentDirectory = directory;
         textInput.setScroll(0);
+        textInput.setContent(Objects.toString(directory, ""));
         if (directory != null) {
-            textInput.setContent(directory.toString());
             children = Streams.concat(Stream.of(directory.resolve("..")), children)
                     .filter(filterHidden());
-        } else {
-            pathList.clear();
-            textInput.setContent("");
         }
         children.forEach(d -> pathList.addPath(d, getDisplayStringForPath(d), navigator::setDirectory));
     }
