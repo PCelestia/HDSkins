@@ -2,6 +2,7 @@ package com.minelittlepony.hdskins.forge.client;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
+import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
@@ -30,6 +31,7 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -175,7 +177,12 @@ public class HDSkinsClientEvents {
 
     private static void replaceNetworkPlayerMap(ClientPlayNetHandler handler) {
         Map<UUID, NetworkPlayerInfo> info = ObfuscationReflectionHelper.getPrivateValue(ClientPlayNetHandler.class, handler, "field_147310_i");
-        info = new EventHookedPlayerInfoMap(info);
+        info = new EventHookedNetworkPlayerMap<NetworkPlayerInfo>(info) {
+            @Override
+            protected void firePutEvent(NetworkPlayerInfo value) {
+                MinecraftForge.EVENT_BUS.post(new AddPlayerEvent(value));
+            }
+        };
         ObfuscationReflectionHelper.setPrivateValue(ClientPlayNetHandler.class, handler, info, "field_147310_i");
     }
 

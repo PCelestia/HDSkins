@@ -2,6 +2,7 @@ package com.minelittlepony.hdskins.fabric.client;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
+import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
@@ -203,7 +204,12 @@ public class HDSkinsClient implements ClientModInitializer {
             Field playerListEntries_field = ClientPlayNetworkHandler.class.getDeclaredField(playerListEntries_fieldName);
             playerListEntries_field.setAccessible(true);
             Map<UUID, PlayerListEntry> info = (Map<UUID, PlayerListEntry>) playerListEntries_field.get(handler);
-            info = new EventHookedPlayerInfoMap(info);
+            info = new EventHookedNetworkPlayerMap<PlayerListEntry>(info) {
+                @Override
+                protected void firePutEvent(PlayerListEntry value) {
+                    AddPlayerCallback.EVENT.invoker().onAddPlayer(value);
+                }
+            };
             playerListEntries_field.set(handler, info);
         } catch (Exception e) {
             throw new RuntimeException(e);
