@@ -18,8 +18,7 @@ public abstract class FileNavigator {
 
     public void setDirectory(Path directory) {
         try {
-            System.out.println(directory.getFileSystem());
-            if (directory.isAbsolute() && directory.getFileName() != null && directory.getFileName().toString().endsWith("..") && directory.getParent().getParent() == null) {
+            if (directory.isAbsolute() && directory.getFileName() != null && directory.getFileName().toString().equals("..") && directory.getParent().getParent() == null) {
                 onDirectory(null, listDrivesOnWindows());
                 this.directory = null;
             } else {
