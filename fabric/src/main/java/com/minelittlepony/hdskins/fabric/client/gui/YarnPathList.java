@@ -4,8 +4,6 @@ import com.minelittlepony.hdskins.common.gui.PathList;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
@@ -22,8 +20,8 @@ public class YarnPathList extends AlwaysSelectedEntryListWidget<YarnPathList.Pat
     }
 
     @Override
-    public void addPath(Path path, Consumer<Path> callback) {
-        this.addEntry(new PathEntry(path, callback));
+    public void addPath(Path path, String display, Consumer<Path> callback) {
+        this.addEntry(new PathEntry(path, display, callback));
     }
 
     @Override
@@ -39,20 +37,17 @@ public class YarnPathList extends AlwaysSelectedEntryListWidget<YarnPathList.Pat
     protected int getScrollbarPosition() {
         return this.right - 6;
     }
+
     public class PathEntry extends AlwaysSelectedEntryListWidget.Entry<PathEntry> {
 
         private final Path path;
         private final String display;
         private final Consumer<Path> callback;
 
-        public PathEntry(Path path, Consumer<Path> callback) {
+        public PathEntry(Path path, String display, Consumer<Path> callback) {
             this.path = path;
+            this.display = display;
             this.callback = callback;
-            String text = this.path.getFileName().toString();
-            if (Files.isDirectory(path)) {
-                text += File.separator;
-            }
-            this.display = text;
         }
 
         @Override

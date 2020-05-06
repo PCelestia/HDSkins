@@ -11,6 +11,8 @@ import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import org.apache.logging.log4j.LogManager;
 
+import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +28,7 @@ public class SkinUploadScreen extends CustomScreen {
 
     private final FileNavigator navigator = new FileNavigator() {
         @Override
-        protected void onDirectory(Path directory, Stream<Path> children) {
+        protected void onDirectory(@Nullable Path directory, Stream<Path> children) {
             SkinUploadScreen.this.onDirectory(directory, children);
         }
 
@@ -80,14 +82,32 @@ public class SkinUploadScreen extends CustomScreen {
         };
     }
 
-    private void onDirectory(Path directory, Stream<Path> children) {
+    private void onDirectory(@Nullable Path directory, Stream<Path> children) {
         pathList.clear();
         this.currentDirectory = directory;
         textInput.setScroll(0);
-        textInput.setContent(directory.toString());
-        Streams.concat(Stream.of(directory.resolve("..")), children)
-                .filter(filterHidden())
-                .forEach(d -> pathList.addPath(d, navigator::setDirectory));
+        if (directory != null) {
+            textInput.setContent(directory.toString());
+            children = Streams.concat(Stream.of(directory.resolve("..")), children)
+                    .filter(filterHidden());
+        } else {
+            pathList.clear();
+            textInput.setContent("");
+        }
+        children.forEach(d -> pathList.addPath(d, getDisplayStringForPath(d), navigator::setDirectory));
+    }
+
+    private static String getDisplayStringForPath(Path path) {
+        String text;
+        if (path.getFileName() != null) {
+            text = path.getFileName().toString();
+            if (Files.isDirectory(path)) {
+                text += File.separator;
+            }
+        } else {
+            text = path.toString();
+        }
+        return text;
     }
 
     private void onSelect(Path path) {

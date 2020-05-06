@@ -4,8 +4,6 @@ import com.minelittlepony.hdskins.common.gui.PathList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.list.ExtendedList;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
@@ -23,8 +21,8 @@ public class MCPPathList extends ExtendedList<MCPPathList.PathEntry> implements 
     }
 
     @Override
-    public void addPath(Path path, Consumer<Path> callback) {
-        this.addEntry(new PathEntry(path, callback));
+    public void addPath(Path path, String display, Consumer<Path> callback) {
+        this.addEntry(new PathEntry(path, display, callback));
     }
 
     @Override
@@ -47,14 +45,10 @@ public class MCPPathList extends ExtendedList<MCPPathList.PathEntry> implements 
         private final String display;
         private final Consumer<Path> callback;
 
-        public PathEntry(Path path, Consumer<Path> callback) {
+        public PathEntry(Path path, String display, Consumer<Path> callback) {
             this.path = path;
+            this.display = display;
             this.callback = callback;
-            String text = this.path.getFileName().toString();
-            if (Files.isDirectory(path)) {
-                text += File.separator;
-            }
-            this.display = text;
         }
 
         @Override

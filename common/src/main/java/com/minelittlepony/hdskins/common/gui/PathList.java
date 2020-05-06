@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 public interface PathList {
     void clear();
 
-    void addPath(Path path, Consumer<Path> callback);
+    void addPath(Path path, String display, Consumer<Path> callback);
 
     void setLeft(int left);
 

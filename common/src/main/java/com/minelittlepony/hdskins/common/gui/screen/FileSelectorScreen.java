@@ -4,16 +4,18 @@ import com.minelittlepony.hdskins.common.file.FileNavigator;
 import com.minelittlepony.hdskins.common.gui.IButton;
 import com.minelittlepony.hdskins.common.gui.ITextField;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FileSelectorScreen extends CustomScreen {
 
     private final FileNavigator navigator = new FileNavigator() {
         @Override
-        protected void onDirectory(Path directory, Stream<Path> children) {
-            FileSelectorScreen.this.textInput.setContent(directory.toString());
+        protected void onDirectory(@Nullable Path directory, Stream<Path> children) {
+            FileSelectorScreen.this.textInput.setContent(Objects.toString(directory, ""));
         }
 
         @Override
