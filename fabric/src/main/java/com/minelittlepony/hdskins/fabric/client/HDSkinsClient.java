@@ -1,6 +1,8 @@
 package com.minelittlepony.hdskins.fabric.client;
 
+import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
+import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
 import com.minelittlepony.hdskins.common.skins.Session;
@@ -12,6 +14,8 @@ import com.minelittlepony.hdskins.fabric.client.callbacks.ClientLogInCallback;
 import com.minelittlepony.hdskins.fabric.client.callbacks.InitScreenCallback;
 import com.minelittlepony.hdskins.fabric.client.gui.screen.YarnScreenWrapper;
 import com.minelittlepony.hdskins.fabric.mixin.client.IMixinPlayerListEntry;
+import com.minelittlepony.hdskins.fabric.mixin.client.IMixinPlayerSkinProvider;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -50,6 +54,8 @@ public class HDSkinsClient implements ClientModInitializer {
     private SkinCache skinCache;
     private final List<PendingSkin> pendingSkins = new LinkedList<>();
 
+    private boolean skinCacheLoaderReplaced;
+
     @Override
     public void onInitializeClient() {
         AddPlayerCallback.EVENT.register(this::onPlayerAdd);
@@ -66,9 +72,29 @@ public class HDSkinsClient implements ClientModInitializer {
 
         pendingSkins.clear();
         skinCache = new SkinCache(HDSkins.instance().getSkinServers(), MinecraftClient.getInstance()::getSessionService);
+
+        if (!skinCacheLoaderReplaced) {
+            replaceSkinCacheLoader();
+            skinCacheLoaderReplaced = true;
+        }
     }
 
+    private void replaceSkinCacheLoader() {
 
+        // replace the skin cache to make it return my skins instead
+        IMixinPlayerSkinProvider skins = (IMixinPlayerSkinProvider) MinecraftClient.getInstance().getSkinProvider();
+        final LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> vanillaCache = skins.getSkinCache();
+        skins.setSkinCache(new EventHookedSkinCache(this::getSkinCache) {
+            @Override
+            protected LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate() {
+                return vanillaCache;
+            }
+        });
+    }
+
+    private SkinCache getSkinCache() {
+        return skinCache;
+    }
     private void onPlayerAdd(PlayerListEntry player) {
 
         skinCache.getPayload(player.getProfile())

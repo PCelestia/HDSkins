@@ -1,13 +1,16 @@
 package com.minelittlepony.hdskins.forge.client;
 
+import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
+import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
 import com.minelittlepony.hdskins.common.skins.Session;
+import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.minelittlepony.hdskins.forge.HDSkins;
-import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.minelittlepony.hdskins.forge.client.gui.screen.MCPScreenWrapper;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,6 +26,7 @@ import net.minecraft.client.network.play.NetworkPlayerInfo;
 import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.SkinManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -46,6 +50,8 @@ public class HDSkinsClientEvents {
     private SkinCache skinCache;
     private final List<PendingSkin> pendingSkins = new LinkedList<>();
 
+    private boolean skinCacheLoaderReplaced;
+
     @SubscribeEvent
     public void onJoin(ClientPlayerNetworkEvent.LoggedInEvent event) {
         ClientPlayerEntity player = event.getPlayer();
@@ -56,6 +62,28 @@ public class HDSkinsClientEvents {
 
         pendingSkins.clear();
         skinCache = new SkinCache(HDSkins.instance().getSkinServers(), Minecraft.getInstance()::getSessionService);
+
+        if (!skinCacheLoaderReplaced) {
+            replaceSkinCacheLoader();
+            skinCacheLoaderReplaced = true;
+        }
+    }
+
+    private void replaceSkinCacheLoader() {
+
+        // replace the skin cache to make it return my skins instead
+        SkinManager skins = Minecraft.getInstance().getSkinManager();
+        final LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> vanillaCache = skins.skinCacheLoader;
+        skins.skinCacheLoader = new EventHookedSkinCache(this::getSkinCache) {
+            @Override
+            protected LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate() {
+                return vanillaCache;
+            }
+        };
+    }
+
+    private SkinCache getSkinCache() {
+        return skinCache;
     }
 
     @SubscribeEvent
