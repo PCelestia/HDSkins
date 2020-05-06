@@ -13,13 +13,17 @@ public class FileSelectorScreen extends CustomScreen {
     private final FileNavigator navigator = new FileNavigator() {
         @Override
         protected void onDirectory(Path directory, Stream<Path> children) {
-            FileSelectorScreen.this.textInput.setText(directory.toString());
+            FileSelectorScreen.this.textInput.setContent(directory.toString());
+        }
 
+        @Override
+        protected void onSelect(Path path) {
+            System.out.println(path);
         }
 
         @Override
         protected void onError(Path oldDirectory) {
-            textInput.setText(oldDirectory.toString());
+            textInput.setContent(oldDirectory.toString());
         }
     };
 
@@ -32,7 +36,7 @@ public class FileSelectorScreen extends CustomScreen {
     @Override
     public void init() {
         textInput = screen.addTextField(10, 30, screen.getWidth() - 50, 18, "");
-        textInput.setMaxLength(Short.MAX_VALUE);
+        textInput.setMaxContentLength(Short.MAX_VALUE);
 
         screen.addButton(screen.getWidth() - 30, 29, 20, 20,
                 "hdskins.directory.go", null, this::goDirectory);
@@ -51,7 +55,7 @@ public class FileSelectorScreen extends CustomScreen {
     }
 
     private void goDirectory(IButton button) {
-        navigator.setDirectory(Paths.get(textInput.getText()));
+        navigator.setDirectory(Paths.get(textInput.getContent()));
     }
 
     private void upDirectory(IButton button) {

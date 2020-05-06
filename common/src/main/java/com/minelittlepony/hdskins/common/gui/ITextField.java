@@ -1,10 +1,15 @@
 package com.minelittlepony.hdskins.common.gui;
 
+import java.util.function.Consumer;
+
 public interface ITextField {
-    String getText();
+    String getContent();
 
-    void setText(String text);
+    void setContent(String text);
 
-    void setMaxLength(int len);
+    void setMaxContentLength(int len);
 
+    void setCallback(Consumer<String> callback);
+
+    void setScroll(int scr);
 }

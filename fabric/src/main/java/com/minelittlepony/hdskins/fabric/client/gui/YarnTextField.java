@@ -1,27 +1,58 @@
 package com.minelittlepony.hdskins.fabric.client.gui;
 
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import org.lwjgl.glfw.GLFW;
 
-public class YarnTextField implements ITextField {
-    private final TextFieldWidget textField;
+import java.util.function.Consumer;
 
-    public YarnTextField(TextFieldWidget textField) {
-        this.textField = textField;
+public class YarnTextField extends TextFieldWidget implements ITextField {
+
+    private Consumer<String> callback;
+
+    public YarnTextField(TextRenderer textRenderer, int x, int y, int width, int height, String message) {
+        super(textRenderer, x, y, width, height, message);
     }
 
     @Override
-    public String getText() {
-        return textField.getText();
+    public String getContent() {
+        return this.getText();
     }
 
     @Override
-    public void setText(String text) {
-        textField.setText(text);
+    public void setContent(String text) {
+        this.setText(text);
     }
 
     @Override
-    public void setMaxLength(int len) {
-        textField.setMaxLength(len);
+    public void setMaxContentLength(int len) {
+        this.setMaxLength(len);
+    }
+
+    @Override
+    public void setCallback(Consumer<String> callback) {
+        this.callback = callback;
+    }
+
+    @Override
+    public void setScroll(int scr) {
+        this.setCursor(scr);
+    }
+
+    @Override
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (super.keyPressed(key, scanCode, modifiers)) {
+            return true;
+        }
+        switch(key) {
+            case GLFW.GLFW_KEY_ENTER:
+            case GLFW.GLFW_KEY_KP_ENTER:
+                if (callback != null) {
+                    callback.accept(this.getText());
+                    return true;
+                }
+        }
+        return false;
     }
 }

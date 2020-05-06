@@ -12,7 +12,6 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.arguments.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
 
@@ -63,7 +62,7 @@ public abstract class AbstractYarnWidgets implements Drawable, Widgets {
 
     @Override
     public ITextField addTextField(int x, int y, int w, int h, String text) {
-        return new YarnTextField(addButton(new TextFieldWidget(getTextRenderer(), x, y, w, h, text)));
+        return addButton(new YarnTextField(getTextRenderer(), x, y, w, h, text));
     }
 
     @Override

@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.ItemStack;
@@ -63,7 +62,7 @@ public abstract class AbstractMCPWidgets implements IRenderable, Widgets {
 
     @Override
     public ITextField addTextField(int x, int y, int w, int h, String text) {
-        return new MCPTextField(addButton(new TextFieldWidget(getTextRenderer(), x, y, w, h, text)));
+        return addButton(new MCPTextField(getTextRenderer(), x, y, w, h, text));
     }
 
     @Override
