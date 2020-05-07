@@ -1,29 +1,15 @@
 package com.minelittlepony.hdskins.fabric;
 
+import com.minelittlepony.hdskins.common.IHDSkins;
 import com.minelittlepony.hdskins.common.skins.SkinServerList;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
-public final class HDSkins implements ModInitializer {
-    public static final String MOD_ID = "hdskins";
-
-    private static HDSkins instance;
-
-    public static HDSkins instance() {
-        return instance;
-    }
+public final class HDSkins implements IHDSkins, ModInitializer {
 
     private SkinServerList skinServers;
-
-    public HDSkins() {
-        instance = this;
-    }
 
     @Override
     public void onInitialize() {
@@ -32,6 +18,7 @@ public final class HDSkins implements ModInitializer {
         skinServers.tryLoad();
     }
 
+    @Override
     public SkinServerList getSkinServers() {
         return skinServers;
     }

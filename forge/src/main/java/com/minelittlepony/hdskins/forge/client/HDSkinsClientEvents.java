@@ -4,12 +4,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
+import com.minelittlepony.hdskins.common.IHDSkins;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
 import com.minelittlepony.hdskins.common.skins.Session;
 import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.minelittlepony.hdskins.common.upload.Uploader;
-import com.minelittlepony.hdskins.forge.HDSkins;
 import com.minelittlepony.hdskins.forge.client.gui.screen.MCPScreenWrapper;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -63,7 +63,7 @@ public class HDSkinsClientEvents {
         }
 
         pendingSkins.clear();
-        skinCache = new SkinCache(HDSkins.instance().getSkinServers(), Minecraft.getInstance()::getSessionService);
+        skinCache = new SkinCache(IHDSkins.instance().getSkinServers(), Minecraft.getInstance()::getSessionService);
 
         if (!skinCacheLoaderReplaced) {
             replaceSkinCacheLoader();
@@ -159,7 +159,7 @@ public class HDSkinsClientEvents {
             event.addWidget(new Button(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
                 Minecraft mc = Minecraft.getInstance();
                 mc.displayGuiScreen(new MCPScreenWrapper(new SkinUploadScreen(
-                        new Uploader(HDSkins.instance().getSkinServers().getSkinServers().get(0),
+                        new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
                                 sessionFromVanilla(mc.getSession()), mc.getSessionService()),
                         (a) -> new FileDrop(mc, mc.getMainWindow()::getHandle, a)
                 )));

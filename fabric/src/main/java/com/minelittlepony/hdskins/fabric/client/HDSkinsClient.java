@@ -4,12 +4,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
+import com.minelittlepony.hdskins.common.IHDSkins;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
 import com.minelittlepony.hdskins.common.skins.Session;
 import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.minelittlepony.hdskins.common.upload.Uploader;
-import com.minelittlepony.hdskins.fabric.HDSkins;
 import com.minelittlepony.hdskins.fabric.client.callbacks.AddPlayerCallback;
 import com.minelittlepony.hdskins.fabric.client.callbacks.ClientLogInCallback;
 import com.minelittlepony.hdskins.fabric.client.callbacks.InitScreenCallback;
@@ -72,7 +72,7 @@ public class HDSkinsClient implements ClientModInitializer {
         }
 
         pendingSkins.clear();
-        skinCache = new SkinCache(HDSkins.instance().getSkinServers(), MinecraftClient.getInstance()::getSessionService);
+        skinCache = new SkinCache(IHDSkins.instance().getSkinServers(), MinecraftClient.getInstance()::getSessionService);
 
         if (!skinCacheLoaderReplaced) {
             replaceSkinCacheLoader();
@@ -163,7 +163,7 @@ public class HDSkinsClient implements ClientModInitializer {
             addButton.accept(new ButtonWidget(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
                 MinecraftClient mc = MinecraftClient.getInstance();
                 mc.openScreen(new YarnScreenWrapper(new SkinUploadScreen(
-                        new Uploader(HDSkins.instance().getSkinServers().getSkinServers().get(0),
+                        new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
                                 sessionFromVanilla(mc.getSession()), mc.getSessionService()),
                         (a) -> new FileDrop(mc, mc.getWindow()::getHandle, a)
                 )));
