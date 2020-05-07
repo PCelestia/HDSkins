@@ -16,6 +16,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -59,7 +60,19 @@ public class SkinServerList {
         }
     }
 
-    public void loadJson() throws IOException {
+    public void tryLoad() {
+        try {
+            try {
+                loadJson();
+            } catch (NoSuchFileException e) {
+                saveJson();
+            }
+        } catch (IOException e) {
+            logger.warn("Unable to load skin servers.", e);
+        }
+    }
+
+    void loadJson() throws IOException {
         try (BufferedReader r = Files.newBufferedReader(configPath)) {
             JsonObject o = gson.fromJson(r, JsonObject.class);
             int version = o.get("configVersion").getAsInt();
@@ -72,7 +85,7 @@ public class SkinServerList {
         }
     }
 
-    public void saveJson() throws IOException {
+    void saveJson() throws IOException {
         Files.createDirectories(configPath.getParent());
         try (BufferedWriter w = Files.newBufferedWriter(configPath)) {
             gson.toJson(this, w);

@@ -19,8 +19,6 @@ public class HDSkins {
 
     public static final String MOD_ID = "hdskins";
 
-    private static final Logger logger = LogManager.getLogger();
-
     private static HDSkins instance;
 
     private SkinServerList skinServers;
@@ -36,17 +34,8 @@ public class HDSkins {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-
         skinServers = new SkinServerList(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
-        try {
-            try {
-                skinServers.loadJson();
-            } catch (NoSuchFileException e) {
-                skinServers.saveJson();
-            }
-        } catch (IOException e) {
-            logger.warn("Unable to load skin servers.", e);
-        }
+        skinServers.tryLoad();
     }
 
     private void clientSetup(FMLClientSetupEvent event) {

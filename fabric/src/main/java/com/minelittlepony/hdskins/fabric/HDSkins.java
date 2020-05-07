@@ -13,8 +13,6 @@ import java.nio.file.Path;
 public final class HDSkins implements ModInitializer {
     public static final String MOD_ID = "hdskins";
 
-    public static final Logger logger = LogManager.getLogger();
-
     private static HDSkins instance;
 
     public static HDSkins instance() {
@@ -31,15 +29,7 @@ public final class HDSkins implements ModInitializer {
     public void onInitialize() {
         Path configDir = FabricLoader.getInstance().getConfigDirectory().toPath();
         skinServers = new SkinServerList(configDir.resolve(MOD_ID));
-        try {
-            try {
-                skinServers.loadJson();
-            } catch (NoSuchFileException e) {
-                skinServers.saveJson();
-            }
-        } catch (IOException e) {
-            logger.warn("Unable to load skin servers.", e);
-        }
+        skinServers.tryLoad();
     }
 
     public SkinServerList getSkinServers() {
