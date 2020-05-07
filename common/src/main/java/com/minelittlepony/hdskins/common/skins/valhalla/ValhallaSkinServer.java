@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.minelittlepony.hdskins.common.skins.Feature;
-import com.minelittlepony.hdskins.common.skins.MoreHttpResponses;
+import com.minelittlepony.hdskins.common.skins.RequestHelper;
 import com.minelittlepony.hdskins.common.skins.Session;
 import com.minelittlepony.hdskins.common.skins.SkinServer;
 import com.minelittlepony.hdskins.common.skins.SkinRequest;
@@ -63,7 +63,7 @@ class ValhallaSkinServer implements SkinServer {
 
     @Override
     public Map<Type, MinecraftProfileTexture> loadProfileData(MinecraftSessionService sessionService, GameProfile profile) throws IOException {
-        try (MoreHttpResponses response = MoreHttpResponses.execute(HTTP_CLIENT, new HttpGet(getTexturesURI(profile)))) {
+        try (RequestHelper response = RequestHelper.execute(HTTP_CLIENT, new HttpGet(getTexturesURI(profile)))) {
 
             if (response.ok()) {
                 MinecraftTexturesPayload payload = response.json(GSON, MinecraftTexturesPayload.class);
@@ -149,7 +149,7 @@ class ValhallaSkinServer implements SkinServer {
     }
 
     private void upload(HttpUriRequest request) throws IOException {
-        try (MoreHttpResponses response = MoreHttpResponses.execute(HTTP_CLIENT, request)) {
+        try (RequestHelper response = RequestHelper.execute(HTTP_CLIENT, request)) {
             if (!response.ok()) {
                 throw new IOException(response.json(GSON, JsonObject.class).get("message").getAsString());
             }
@@ -178,7 +178,7 @@ class ValhallaSkinServer implements SkinServer {
     }
 
     private AuthHandshake authHandshake(String name) throws IOException {
-        try (MoreHttpResponses resp = MoreHttpResponses.execute(HTTP_CLIENT, RequestBuilder.post()
+        try (RequestHelper resp = RequestHelper.execute(HTTP_CLIENT, RequestBuilder.post()
                 .setUri(getHandshakeURI())
                 .addParameter("name", name)
                 .build())) {
@@ -190,7 +190,7 @@ class ValhallaSkinServer implements SkinServer {
     }
 
     private AuthResponse authResponse(String name, long verifyToken) throws IOException {
-        try (MoreHttpResponses resp = MoreHttpResponses.execute(HTTP_CLIENT, RequestBuilder.post()
+        try (RequestHelper resp = RequestHelper.execute(HTTP_CLIENT, RequestBuilder.post()
                 .setUri(getResponseURI())
                 .addParameter("name", name)
                 .addParameter("verifyToken", String.valueOf(verifyToken))
@@ -202,7 +202,7 @@ class ValhallaSkinServer implements SkinServer {
         }
     }
 
-    private String getErrorMessage(MoreHttpResponses resp) throws IOException {
+    private String getErrorMessage(RequestHelper resp) throws IOException {
         return resp.json(GSON, JsonObject.class).get("message").getAsString();
     }
 

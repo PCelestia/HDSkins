@@ -3,7 +3,7 @@ package com.minelittlepony.hdskins.common.skins.yggdrasil;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.minelittlepony.hdskins.common.skins.Feature;
-import com.minelittlepony.hdskins.common.skins.MoreHttpResponses;
+import com.minelittlepony.hdskins.common.skins.RequestHelper;
 import com.minelittlepony.hdskins.common.skins.Session;
 import com.minelittlepony.hdskins.common.skins.SkinServer;
 import com.minelittlepony.hdskins.common.skins.SkinRequest;
@@ -90,7 +90,7 @@ class YggdrasilSkinServer implements SkinServer {
             case "https":
                 return request
                         .addParameter("file", upload.getImage().toString())
-                        .addParameters(MoreHttpResponses.mapAsParameters(mapMetadata(upload.getMetadata())));
+                        .addParameters(RequestHelper.mapAsParameters(mapMetadata(upload.getMetadata())));
             default:
                 throw new IOException("Unsupported URI scheme: " + scheme);
         }
@@ -121,7 +121,7 @@ class YggdrasilSkinServer implements SkinServer {
     }
 
     private void send(RequestBuilder request) throws IOException {
-        try (MoreHttpResponses response = MoreHttpResponses.execute(HTTP_CLIENT, request.build())) {
+        try (RequestHelper response = RequestHelper.execute(HTTP_CLIENT, request.build())) {
             if (!response.ok()) {
                 throw new IOException(response.json(new Gson(), ErrorResponse.class).toString());
             }
