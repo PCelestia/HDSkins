@@ -2,7 +2,7 @@ package com.minelittlepony.hdskins.forge;
 
 import com.minelittlepony.hdskins.common.IHDSkins;
 import com.minelittlepony.hdskins.common.skins.SkinServerList;
-import com.minelittlepony.hdskins.forge.client.HDSkinsClientEvents;
+import com.minelittlepony.hdskins.forge.client.HDSkinsClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -26,7 +26,7 @@ public class HDSkins implements IHDSkins {
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
-        MinecraftForge.EVENT_BUS.register(new HDSkinsClientEvents());
+        MinecraftForge.EVENT_BUS.register(new HDSkinsClient());
     }
 
     public SkinServerList getSkinServers() {

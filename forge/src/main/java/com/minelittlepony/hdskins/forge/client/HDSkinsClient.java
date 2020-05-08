@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class HDSkinsClientEvents {
+public class HDSkinsClient {
     private static final Logger logger = LogManager.getLogger();
     private static final Path skinCacheDir = assetsDir().resolve("hdskins");
 
