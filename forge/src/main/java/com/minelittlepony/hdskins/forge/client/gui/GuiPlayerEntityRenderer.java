@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.forge.client.gui;
 
-import com.minelittlepony.hdskins.common.gui.IPlayerEntityRenderer;
+import com.minelittlepony.hdskins.common.gui.AbstractPlayerEntityRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.LivingEntity;
 
-public class GuiPlayerEntityRenderer extends IPlayerEntityRenderer {
+public class GuiPlayerEntityRenderer extends AbstractPlayerEntityRenderer {
 
     private final LivingEntity entity;
 

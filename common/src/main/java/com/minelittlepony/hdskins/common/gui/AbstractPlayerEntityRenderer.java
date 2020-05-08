@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.common.gui;
 
-public abstract class IPlayerEntityRenderer {
+public abstract class AbstractPlayerEntityRenderer {
 
     public float rotation;
     public float pitch;

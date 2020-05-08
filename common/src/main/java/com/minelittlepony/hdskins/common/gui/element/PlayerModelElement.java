@@ -1,7 +1,7 @@
 package com.minelittlepony.hdskins.common.gui.element;
 
 import com.minelittlepony.hdskins.common.gui.IGuiHelper;
-import com.minelittlepony.hdskins.common.gui.IPlayerEntityRenderer;
+import com.minelittlepony.hdskins.common.gui.AbstractPlayerEntityRenderer;
 import com.minelittlepony.hdskins.common.gui.IRender;
 import org.lwjgl.glfw.GLFW;
 
@@ -10,14 +10,14 @@ public class PlayerModelElement extends CustomElement implements IRender {
     private final int yPos;
     private final int width;
     private final int height;
-    private final IPlayerEntityRenderer player;
+    private final AbstractPlayerEntityRenderer player;
 
     private int prevMouseX;
     private int prevMouseY;
 
     private boolean clicked;
 
-    public PlayerModelElement(int xPos, int yPos, int width, int height, IPlayerEntityRenderer player) {
+    public PlayerModelElement(int xPos, int yPos, int width, int height, AbstractPlayerEntityRenderer player) {
         this.xPos = xPos;
         this.yPos = yPos;
         this.width = width;

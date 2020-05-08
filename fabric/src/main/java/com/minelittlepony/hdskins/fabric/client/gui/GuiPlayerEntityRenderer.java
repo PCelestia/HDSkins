@@ -1,6 +1,6 @@
 package com.minelittlepony.hdskins.fabric.client.gui;
 
-import com.minelittlepony.hdskins.common.gui.IPlayerEntityRenderer;
+import com.minelittlepony.hdskins.common.gui.AbstractPlayerEntityRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
@@ -11,7 +11,7 @@ import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Quaternion;
 
-public class GuiPlayerEntityRenderer extends IPlayerEntityRenderer {
+public class GuiPlayerEntityRenderer extends AbstractPlayerEntityRenderer {
 
     private final LivingEntity entity;
 
