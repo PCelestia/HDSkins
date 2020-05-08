@@ -16,13 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.GameType;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -65,9 +60,8 @@ public abstract class AbstractMCPWidgets implements Widgets {
 
     @Override
     public PlayerModelElement addEntity(int x, int y, int w, int h) {
-        WorldSettings settings = new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT);
-        ClientWorld world = new ClientWorld(null, settings, DimensionType.OVERWORLD, 0, null, Minecraft.getInstance().worldRenderer);
-        GuiPlayerEntityRenderer widget = new GuiPlayerEntityRenderer(new DummyPlayer(world, Minecraft.getInstance().getSession().getProfile()));
+        Minecraft mc = Minecraft.getInstance();
+        GuiPlayerEntityRenderer widget = new GuiPlayerEntityRenderer(new DummyPlayer(mc.getSession().getProfile()));
         PlayerModelElement player = new PlayerModelElement(x, y, w, h, widget);
         children().add(new GuiListenerAdapter(player));
         return player;

@@ -16,13 +16,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.arguments.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.level.LevelGeneratorType;
-import net.minecraft.world.level.LevelInfo;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -62,12 +57,11 @@ public abstract class AbstractYarnWidgets implements Widgets {
         children().add(list);
         return list;
     }
+
     @Override
     public PlayerModelElement addEntity(int x, int y, int w, int h) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        LevelInfo settings = new LevelInfo(0, GameMode.NOT_SET, false, false, LevelGeneratorType.DEFAULT);
-        ClientWorld world = new ClientWorld(null, settings, DimensionType.OVERWORLD, 0, null, mc.worldRenderer);
-        GuiPlayerEntityRenderer widget = new GuiPlayerEntityRenderer(new DummyPlayer(world, mc.getSession().getProfile()));
+        GuiPlayerEntityRenderer widget = new GuiPlayerEntityRenderer(new DummyPlayer(mc.getSession().getProfile()));
         PlayerModelElement player = new PlayerModelElement(x, y, w, h, widget);
         children().add(new GuiListenerAdapter(player));
         return player;
