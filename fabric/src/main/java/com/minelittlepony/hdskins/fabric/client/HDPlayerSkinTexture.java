@@ -4,23 +4,20 @@ import com.minelittlepony.hdskins.common.texture.HDSkinProcessor;
 import com.minelittlepony.hdskins.common.texture.Image;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.PlayerSkinTexture;
-import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class HDPlayerSkinTexture extends PlayerSkinTexture implements IPlayerSkinTexture {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final boolean isSkin;
+    private final IPlayerSkinTextureAccessors that = (IPlayerSkinTextureAccessors) this;
 
-    public HDPlayerSkinTexture(@Nullable File cacheFileIn, String imageUrlIn, Identifier identifier, boolean legacySkinIn, @Nullable Runnable processTaskIn) {
-        super(cacheFileIn, imageUrlIn, identifier, legacySkinIn, processTaskIn);
-        this.isSkin = legacySkinIn;
+    public HDPlayerSkinTexture(IPlayerSkinTextureAccessors texture) {
+        super(texture.getCacheFile(), texture.getUrl(), texture.getLocation(), texture.isConvertLegacy(), texture.getLoadedCallback());
     }
 
     @Nullable
@@ -30,7 +27,7 @@ public class HDPlayerSkinTexture extends PlayerSkinTexture implements IPlayerSki
 
         try {
             nativeimage = NativeImage.read(inputStreamIn);
-            if (this.isSkin) {
+            if (that.isConvertLegacy()) {
                 nativeimage = processLegacySkin0(nativeimage);
             }
         } catch (IOException ioexception) {

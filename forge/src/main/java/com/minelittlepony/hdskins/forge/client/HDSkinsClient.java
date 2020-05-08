@@ -1,7 +1,6 @@
 package com.minelittlepony.hdskins.forge.client;
 
 import com.google.common.cache.LoadingCache;
-import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.IHDSkins;
@@ -15,8 +14,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -24,9 +21,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.network.play.NetworkPlayerInfo;
+import net.minecraft.client.renderer.texture.DownloadingTexture;
 import net.minecraft.client.renderer.texture.Texture;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -39,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +42,6 @@ import java.util.UUID;
 
 public class HDSkinsClient {
     private static final Logger logger = LogManager.getLogger();
-    private static final Path skinCacheDir = assetsDir().resolve("hdskins");
 
     private SkinCache skinCache;
     private final List<PendingSkin> pendingSkins = new LinkedList<>();
@@ -66,20 +60,36 @@ public class HDSkinsClient {
         skinCache = new SkinCache(IHDSkins.instance().getSkinServers(), Minecraft.getInstance()::getSessionService);
 
         if (!skinCacheLoaderReplaced) {
-            replaceSkinCacheLoader();
+            SkinManager skins = Minecraft.getInstance().getSkinManager();
+            replaceSkinCacheLoader(skins);
+            replaceSkinTextureManager(skins);
             skinCacheLoaderReplaced = true;
         }
     }
 
-    private void replaceSkinCacheLoader() {
+    private void replaceSkinCacheLoader(SkinManager skins) {
 
         // replace the skin cache to make it return my skins instead
-        SkinManager skins = Minecraft.getInstance().getSkinManager();
         final LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> vanillaCache = skins.skinCacheLoader;
         skins.skinCacheLoader = new EventHookedSkinCache(this::getSkinCache) {
             @Override
             protected LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate() {
                 return vanillaCache;
+            }
+        };
+    }
+
+    private void replaceSkinTextureManager(SkinManager skins) {
+        // Replacing the texture manager allows me to intercept loadTexture and
+        // substitute the Texture object with one that supports HD Skins.
+        skins.textureManager = new ForwardingTextureManager(skins.textureManager) {
+            @Override
+            public void loadTexture(ResourceLocation textureLocation, Texture textureObj) {
+                if (textureObj instanceof DownloadingTexture && !(textureObj instanceof HDDownloadingTexture)) {
+                    textureObj = new HDDownloadingTexture((DownloadingTexture) textureObj);
+                }
+
+                super.loadTexture(textureLocation, textureObj);
             }
         };
     }
@@ -112,23 +122,13 @@ public class HDSkinsClient {
     }
 
     private void loadSkin(MinecraftProfileTexture profileTexture, Type textureType, @Nullable Callback callback) {
-        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        String textureName = Hashing.sha1().hashUnencodedChars(profileTexture.getHash()).toString();
-        ResourceLocation resourcelocation = new ResourceLocation("hdskins", "skins/" + textureName);
-        Texture texture = textureManager.getTexture(resourcelocation);
-        if (texture != null) {
+
+        SkinManager skins = Minecraft.getInstance().getSkinManager();
+        skins.loadSkin(profileTexture, textureType, (type, location, texture) -> {
             if (callback != null) {
-                callback.onSkinAvailable(resourcelocation);
+                callback.onSkinAvailable(location);
             }
-        } else {
-            String prefix = textureName.length() > 2 ? textureName.substring(0, 2) : "xx";
-            Path path = skinCacheDir.resolve(prefix).resolve(textureName);
-            textureManager.loadTexture(resourcelocation, new HDDownloadingTexture(path.toFile(), profileTexture.getUrl(), DefaultPlayerSkin.getDefaultSkinLegacy(), textureType == Type.SKIN, () -> {
-                if (callback != null) {
-                    callback.onSkinAvailable(resourcelocation);
-                }
-            }));
-        }
+        });
     }
 
     @SubscribeEvent
@@ -169,10 +169,6 @@ public class HDSkinsClient {
 
     private static Session sessionFromVanilla(net.minecraft.util.Session session) {
         return new Session(session.getToken(), session.getProfile());
-    }
-
-    private static Path assetsDir() {
-        return Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.ASSETSDIR.get()).orElseThrow(UnsupportedOperationException::new);
     }
 
     private static void replaceNetworkPlayerMap(ClientPlayNetHandler handler) {

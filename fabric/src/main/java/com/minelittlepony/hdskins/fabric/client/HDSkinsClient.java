@@ -1,7 +1,6 @@
 package com.minelittlepony.hdskins.fabric.client;
 
 import com.google.common.cache.LoadingCache;
-import com.google.common.hash.Hashing;
 import com.minelittlepony.hdskins.common.EventHookedNetworkPlayerMap;
 import com.minelittlepony.hdskins.common.EventHookedSkinCache;
 import com.minelittlepony.hdskins.common.IHDSkins;
@@ -33,16 +32,13 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.PlayerSkinProvider;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.util.DefaultSkinHelper;
+import net.minecraft.client.texture.PlayerSkinTexture;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.lang.reflect.Field;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,15 +71,16 @@ public class HDSkinsClient implements ClientModInitializer {
         skinCache = new SkinCache(IHDSkins.instance().getSkinServers(), MinecraftClient.getInstance()::getSessionService);
 
         if (!skinCacheLoaderReplaced) {
-            replaceSkinCacheLoader();
+            IMixinPlayerSkinProvider skins = (IMixinPlayerSkinProvider) MinecraftClient.getInstance().getSkinProvider();
+            replaceSkinCacheLoader(skins);
+            replaceSkinTextureManager(skins);
             skinCacheLoaderReplaced = true;
         }
     }
 
-    private void replaceSkinCacheLoader() {
+    private void replaceSkinCacheLoader(IMixinPlayerSkinProvider skins) {
 
         // replace the skin cache to make it return my skins instead
-        IMixinPlayerSkinProvider skins = (IMixinPlayerSkinProvider) MinecraftClient.getInstance().getSkinProvider();
         final LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> vanillaCache = skins.getSkinCache();
         skins.setSkinCache(new EventHookedSkinCache(this::getSkinCache) {
             @Override
@@ -93,9 +90,24 @@ public class HDSkinsClient implements ClientModInitializer {
         });
     }
 
+    private void replaceSkinTextureManager(IMixinPlayerSkinProvider skins) {
+        // Replacing the texture manager allows me to intercept loadTexture and
+        // substitute the Texture object with one that supports HD Skins.
+        skins.setTextureManager(new ForwardingTextureManager(skins.getTextureManager()) {
+            @Override
+            public void registerTexture(Identifier identifier, AbstractTexture abstractTexture) {
+                if (abstractTexture instanceof PlayerSkinTexture && !(abstractTexture instanceof HDPlayerSkinTexture)) {
+                    abstractTexture = new HDPlayerSkinTexture(((IPlayerSkinTextureAccessors) abstractTexture));
+                }
+                super.registerTexture(identifier, abstractTexture);
+            }
+        });
+    }
+
     private SkinCache getSkinCache() {
         return skinCache;
     }
+
     private void onPlayerAdd(PlayerListEntry player) {
 
         skinCache.getPayload(player.getProfile())
@@ -119,23 +131,12 @@ public class HDSkinsClient implements ClientModInitializer {
     }
 
     private void loadSkin(MinecraftProfileTexture profileTexture, Type textureType, @Nullable Callback callback) {
-        TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
-        String textureName = Hashing.sha1().hashUnencodedChars(profileTexture.getHash()).toString();
-        Identifier textureId = new Identifier("hdskins", "skins/" + textureName);
-        AbstractTexture texture = textureManager.getTexture(textureId);
-        if (texture != null) {
+        PlayerSkinProvider skins = MinecraftClient.getInstance().getSkinProvider();
+        skins.loadSkin(profileTexture, textureType, (type, identifier, texture) -> {
             if (callback != null) {
-                callback.onSkinAvailable(textureId);
+                callback.onSkinAvailable(identifier);
             }
-        } else {
-            String prefix = textureName.length() > 2 ? textureName.substring(0, 2) : "xx";
-            Path path = assetsDir().resolve("hdskins").resolve(prefix).resolve(textureName);
-            textureManager.registerTexture(textureId, new HDPlayerSkinTexture(path.toFile(), profileTexture.getUrl(), DefaultSkinHelper.getTexture(), textureType == Type.SKIN, () -> {
-                if (callback != null) {
-                    callback.onSkinAvailable(textureId);
-                }
-            }));
-        }
+        });
     }
 
     private void onTick(MinecraftClient mc) {
@@ -173,24 +174,6 @@ public class HDSkinsClient implements ClientModInitializer {
 
     private static Session sessionFromVanilla(net.minecraft.client.util.Session session) {
         return new Session(session.getAccessToken(), session.getProfile());
-    }
-
-    private static Path assetsDir() {
-        // PlayerSkinProvider.skinCacheDir: File
-        String skinCacheDir_fieldName = FabricLoader.getInstance().getMappingResolver().mapFieldName("intermediary",
-                "net.minecraft.class_1071",
-                "field_5305",
-                "Ljava/io/File;");
-        PlayerSkinProvider skins = MinecraftClient.getInstance().getSkinProvider();
-        try {
-            Field skinCacheDir_field = PlayerSkinProvider.class.getDeclaredField(skinCacheDir_fieldName);
-            skinCacheDir_field.setAccessible(true);
-            File skinCacheDir = (File) skinCacheDir_field.get(skins);
-            return skinCacheDir.getParentFile().toPath();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @SuppressWarnings("unchecked")

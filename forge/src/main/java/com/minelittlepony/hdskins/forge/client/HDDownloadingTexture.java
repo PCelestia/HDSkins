@@ -4,23 +4,18 @@ import com.minelittlepony.hdskins.common.texture.HDSkinProcessor;
 import com.minelittlepony.hdskins.common.texture.Image;
 import net.minecraft.client.renderer.texture.DownloadingTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class HDDownloadingTexture extends DownloadingTexture {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final boolean isSkin;
-
-    public HDDownloadingTexture(@Nullable File cacheFileIn, String imageUrlIn, ResourceLocation textureResourceLocation, boolean legacySkinIn, @Nullable Runnable processTaskIn) {
-        super(cacheFileIn, imageUrlIn, textureResourceLocation, legacySkinIn, processTaskIn);
-        this.isSkin = legacySkinIn;
+    public HDDownloadingTexture(DownloadingTexture texture) {
+        super(texture.cacheFile, texture.imageUrl, texture.textureLocation, texture.legacySkin, texture.processTask);
     }
 
     @Nullable
@@ -30,7 +25,7 @@ public class HDDownloadingTexture extends DownloadingTexture {
 
         try {
             nativeimage = NativeImage.read(inputStreamIn);
-            if (this.isSkin) {
+            if (this.legacySkin) {
                 nativeimage = processLegacySkin0(nativeimage);
             }
         } catch (IOException ioexception) {

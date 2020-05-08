@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import net.minecraft.client.texture.PlayerSkinProvider;
+import net.minecraft.client.texture.TextureManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -18,4 +19,11 @@ public interface IMixinPlayerSkinProvider {
 
     @Accessor
     void setSkinCache(LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> cache);
+
+    @Accessor
+    TextureManager getTextureManager();
+
+    @Accessor
+    void setTextureManager(TextureManager textures);
+
 }
