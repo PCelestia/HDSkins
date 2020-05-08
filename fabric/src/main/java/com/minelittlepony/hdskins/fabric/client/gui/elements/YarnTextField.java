@@ -1,13 +1,14 @@
-package com.minelittlepony.hdskins.fabric.client.gui;
+package com.minelittlepony.hdskins.fabric.client.gui.elements;
 
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import com.minelittlepony.hdskins.fabric.client.gui.IRenderAdapter;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
-public class YarnTextField extends TextFieldWidget implements ITextField {
+public class YarnTextField extends TextFieldWidget implements ITextField, IRenderAdapter {
 
     private Consumer<String> callback;
 
@@ -55,4 +56,5 @@ public class YarnTextField extends TextFieldWidget implements ITextField {
         }
         return false;
     }
+
 }

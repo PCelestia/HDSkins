@@ -2,7 +2,7 @@ package com.minelittlepony.hdskins.common.gui;
 
 import java.util.function.Consumer;
 
-public interface ITextField {
+public interface ITextField extends IRender {
     String getContent();
 
     void setContent(String text);

@@ -1,39 +1,45 @@
 package com.minelittlepony.hdskins.fabric.client.gui.screen;
 
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.IScreen;
+import com.minelittlepony.hdskins.common.gui.ITextRenderer;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.fabric.client.gui.AbstractYarnWidgets;
+import com.minelittlepony.hdskins.fabric.client.gui.GuiHelperAdapter;
+import com.minelittlepony.hdskins.fabric.client.gui.YarnScreenAdapter;
+import com.minelittlepony.hdskins.fabric.client.gui.YarnTextAdapter;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableText;
 
 import java.util.List;
 
 public class YarnScreenWrapper extends Screen {
 
-    protected YarnScreen screenHelper;
     protected final CustomScreen screen;
+    private final IGuiHelper gui = new GuiHelperAdapter(this);
 
     public YarnScreenWrapper(CustomScreen screen) {
         super(new TranslatableText(screen.getTitle()));
         this.screen = screen;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void init() {
-        screenHelper = new YarnScreen();
-        screen.init(screenHelper);
+        screen.init(new YarnScreen(), new YarnWidgets());
     }
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.renderBackground();
 
-        screen.render(mouseX, mouseY, delta);
+        screen.render(mouseX, mouseY, delta, gui);
         super.render(mouseX, mouseY, delta);
-        screenHelper.render(mouseX, mouseY, delta);
 
         this.buttons.stream()
                 .filter(AbstractButtonWidget::isHovered)
@@ -50,10 +56,22 @@ public class YarnScreenWrapper extends Screen {
         screen.removed();
     }
 
-    protected class YarnScreen extends AbstractYarnWidgets implements IScreen {
+    protected class YarnScreen extends YarnScreenAdapter {
+
+        public YarnScreen() {
+            super(YarnScreenWrapper.this);
+        }
 
         @Override
-        protected TextRenderer getTextRenderer() {
+        public ITextRenderer getTextRenderer() {
+            return new YarnTextAdapter(font);
+        }
+    }
+
+    protected class YarnWidgets extends AbstractYarnWidgets {
+
+        @Override
+        public TextRenderer getTextRenderer() {
             return font;
         }
 
@@ -67,19 +85,5 @@ public class YarnScreenWrapper extends Screen {
             return YarnScreenWrapper.this.children;
         }
 
-        @Override
-        public int getWidth() {
-            return YarnScreenWrapper.this.width;
-        }
-
-        @Override
-        public int getHeight() {
-            return YarnScreenWrapper.this.height;
-        }
-
-        @Override
-        public void close() {
-            YarnScreenWrapper.this.onClose();
-        }
     }
 }

@@ -1,13 +1,14 @@
-package com.minelittlepony.hdskins.fabric.client.gui;
+package com.minelittlepony.hdskins.fabric.client.gui.elements;
 
 import com.minelittlepony.hdskins.common.gui.PathList;
+import com.minelittlepony.hdskins.fabric.client.gui.IRenderAdapter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class YarnPathList extends AlwaysSelectedEntryListWidget<YarnPathList.PathEntry> implements PathList {
+public class YarnPathList extends AlwaysSelectedEntryListWidget<YarnPathList.PathEntry> implements PathList, IRenderAdapter {
 
     public YarnPathList(MinecraftClient mcIn, int widthIn, int heightIn, int topIn, int bottomIn) {
         super(mcIn, widthIn, heightIn, topIn, bottomIn, 12);

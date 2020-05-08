@@ -1,8 +1,11 @@
 package com.minelittlepony.hdskins.common.gui.screen;
 
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
+import com.minelittlepony.hdskins.common.gui.IRender;
 import com.minelittlepony.hdskins.common.gui.IScreen;
+import com.minelittlepony.hdskins.common.gui.Widgets;
 
-public abstract class CustomScreen {
+public abstract class CustomScreen implements IRender {
 
     private final String title;
     protected IScreen screen;
@@ -15,17 +18,18 @@ public abstract class CustomScreen {
         return title;
     }
 
-    public void render(int mouseX, int mouseY, float delta) { }
+    public void render(int mouseX, int mouseY, float delta, IGuiHelper gui) { }
 
-    protected void init() {}
+    protected void init(Widgets factory) {}
 
     public void tick() {}
 
     public void removed() {}
 
-    public final void init(IScreen screen) {
+    @Deprecated
+    public final void init(IScreen screen, Widgets factory) {
         this.screen = screen;
-        init();
+        init(factory);
     }
 
 }

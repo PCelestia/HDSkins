@@ -1,13 +1,12 @@
-package com.minelittlepony.hdskins.fabric.client.gui;
+package com.minelittlepony.hdskins.common.gui.element;
 
-import com.minelittlepony.hdskins.common.gui.ILabel;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.resource.language.I18n;
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
+import com.minelittlepony.hdskins.common.gui.IRender;
+import com.minelittlepony.hdskins.common.gui.ITextRenderer;
 
-public class YarnLabel implements ILabel, Drawable {
+public class Label extends CustomElement implements IRender {
 
-    private final TextRenderer font;
+    private final ITextRenderer font;
     private final int x;
     private final int y;
     private String text;
@@ -15,23 +14,26 @@ public class YarnLabel implements ILabel, Drawable {
     private final boolean shadow;
     private final boolean centered;
 
-    public YarnLabel(TextRenderer font, int x, int y, String text, int color, boolean shadow, boolean centered) {
+    public Label(ITextRenderer font, int x, int y, String text, int color, boolean shadow, boolean centered) {
         this.font = font;
         this.x = x;
         this.y = y;
-        this.text = I18n.translate(text);
+        this.text = text;
         this.color = color;
         this.shadow = shadow;
         this.centered = centered;
     }
 
-    @Override
+    public Label(ITextRenderer font, int x, int y, String text) {
+        this(font, x, y, text, -1, false, false);
+    }
+
     public void setText(String text) {
         this.text = text;
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(int mouseX, int mouseY, float partial, IGuiHelper gui) {
         int xPos = x;
         if (this.centered) {
             xPos -= font.getStringWidth(text) / 2;

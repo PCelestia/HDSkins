@@ -1,13 +1,14 @@
-package com.minelittlepony.hdskins.forge.client.gui;
+package com.minelittlepony.hdskins.forge.client.gui.widgets;
 
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import com.minelittlepony.hdskins.forge.client.gui.IRenderAdapter;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
-public class MCPTextField extends TextFieldWidget implements ITextField {
+public class MCPTextField extends TextFieldWidget implements ITextField, IRenderAdapter {
 
     private Consumer<String> callback;
 

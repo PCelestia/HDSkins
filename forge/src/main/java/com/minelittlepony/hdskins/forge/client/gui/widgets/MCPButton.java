@@ -1,6 +1,8 @@
-package com.minelittlepony.hdskins.forge.client.gui;
+package com.minelittlepony.hdskins.forge.client.gui.widgets;
 
 import com.minelittlepony.hdskins.common.gui.IButton;
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
+import com.minelittlepony.hdskins.forge.client.gui.IRenderAdapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.AbstractButton;
 
@@ -8,7 +10,7 @@ import net.minecraft.client.resources.I18n;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
-public class MCPButton extends AbstractButton implements IButton {
+public class MCPButton extends AbstractButton implements IButton, IRenderAdapter {
 
     @Nullable
     private final String tooltip;
@@ -39,5 +41,10 @@ public class MCPButton extends AbstractButton implements IButton {
         if (tooltip != null) {
             Minecraft.getInstance().currentScreen.renderTooltip(tooltip, mouseX, mouseY + 10);
         }
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partial, IGuiHelper gui) {
+        render(mouseX, mouseY, partial);
     }
 }

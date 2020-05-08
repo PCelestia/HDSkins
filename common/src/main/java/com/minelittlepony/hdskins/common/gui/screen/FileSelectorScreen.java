@@ -2,7 +2,10 @@ package com.minelittlepony.hdskins.common.gui.screen;
 
 import com.minelittlepony.hdskins.common.file.FileNavigator;
 import com.minelittlepony.hdskins.common.gui.IButton;
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.ITextField;
+import com.minelittlepony.hdskins.common.gui.Widgets;
+import com.minelittlepony.hdskins.common.gui.element.Label;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -29,6 +32,7 @@ public class FileSelectorScreen extends CustomScreen {
         }
     };
 
+    private Label lblTitle;
     private ITextField textInput;
 
     protected FileSelectorScreen(String title) {
@@ -36,24 +40,29 @@ public class FileSelectorScreen extends CustomScreen {
     }
 
     @Override
-    public void init() {
-        textInput = screen.addTextField(10, 30, screen.getWidth() - 50, 18, "");
+    public void init(Widgets factory) {
+        textInput = factory.addTextField(10, 30, screen.getWidth() - 50, 18, "");
         textInput.setMaxContentLength(Short.MAX_VALUE);
 
-        screen.addButton(screen.getWidth() - 30, 29, 20, 20,
+        factory.addButton(screen.getWidth() - 30, 29, 20, 20,
                 "hdskins.directory.go", null, this::goDirectory);
 
-        screen.addLabel(screen.getWidth() / 2, 5, getTitle(), -1, false, false);
+        lblTitle = new Label(screen.getTextRenderer(), screen.getWidth() / 2, 5, screen.translate(getTitle()), -1, false, false);
 
-        IButton parentBtn = screen.addButton(screen.getWidth() / 2 - 160, screen.getHeight() - 25, 100, 20,
+        IButton parentBtn = factory.addButton(screen.getWidth() / 2 - 160, screen.getHeight() - 25, 100, 20,
                 "hdskins.directory.up", null, this::upDirectory);
         parentBtn.setEnabled(navigator.canNavigateUp());
 
-        screen.addButton(screen.getWidth()/2 + 60, screen.getHeight() - 25, 100, 20,
+        factory.addButton(screen.getWidth()/2 + 60, screen.getHeight() - 25, 100, 20,
                 "hdskins.options.close", null, b -> screen.close());
 
         // TODO get the last used directory
         navigator.setDirectory(Paths.get("."));
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float delta, IGuiHelper gui) {
+        lblTitle.render(mouseX, mouseY, delta, gui);
     }
 
     private void goDirectory(IButton button) {

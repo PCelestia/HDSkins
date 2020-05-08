@@ -1,8 +1,13 @@
 package com.minelittlepony.hdskins.forge.client.gui.screen;
 
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.IScreen;
+import com.minelittlepony.hdskins.common.gui.ITextRenderer;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.forge.client.gui.AbstractMCPWidgets;
+import com.minelittlepony.hdskins.forge.client.gui.GuiHelperAdapter;
+import com.minelittlepony.hdskins.forge.client.gui.MCPScreenAdapter;
+import com.minelittlepony.hdskins.forge.client.gui.MCPTextAdapter;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
@@ -13,27 +18,26 @@ import java.util.List;
 
 public class MCPScreenWrapper extends Screen {
 
-    protected SrgScreen screenHelper;
     protected final CustomScreen screen;
+    private final IGuiHelper gui = new GuiHelperAdapter(this);
 
     public MCPScreenWrapper(CustomScreen screen) {
         super(new TranslationTextComponent(screen.getTitle()));
         this.screen = screen;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void init() {
-        screenHelper = new SrgScreen();
-        screen.init(screenHelper);
+        screen.init( new SrgScreen(), new SrgWidgets());
     }
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.renderBackground();
 
-        screen.render(mouseX, mouseY, delta);
+        screen.render(mouseX, mouseY, delta, gui);
         super.render(mouseX, mouseY, delta);
-        screenHelper.render(mouseX, mouseY, delta);
 
         this.buttons.stream()
                 .filter(Widget::isHovered)
@@ -50,10 +54,22 @@ public class MCPScreenWrapper extends Screen {
         screen.removed();
     }
 
-    protected class SrgScreen extends AbstractMCPWidgets implements IScreen {
+    protected class SrgScreen extends MCPScreenAdapter {
+
+        public SrgScreen() {
+            super(MCPScreenWrapper.this);
+        }
 
         @Override
-        protected FontRenderer getTextRenderer() {
+        public ITextRenderer getTextRenderer() {
+            return new MCPTextAdapter(font);
+        }
+    }
+
+    protected class SrgWidgets extends AbstractMCPWidgets {
+
+        @Override
+        public FontRenderer getTextRenderer() {
             return font;
         }
 
@@ -67,19 +83,5 @@ public class MCPScreenWrapper extends Screen {
             return MCPScreenWrapper.this.children;
         }
 
-        @Override
-        public int getWidth() {
-            return MCPScreenWrapper.this.width;
-        }
-
-        @Override
-        public int getHeight() {
-            return MCPScreenWrapper.this.height;
-        }
-
-        @Override
-        public void close() {
-            MCPScreenWrapper.this.onClose();
-        }
     }
 }

@@ -1,4 +1,4 @@
-package com.minelittlepony.hdskins.forge.client.gui;
+package com.minelittlepony.hdskins.forge.client.gui.widgets;
 
 import com.minelittlepony.hdskins.common.gui.IButton;
 import net.minecraft.client.Minecraft;

@@ -4,8 +4,12 @@ import com.google.common.collect.Streams;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.file.FileNavigator;
 import com.minelittlepony.hdskins.common.gui.IButton;
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.ITextField;
 import com.minelittlepony.hdskins.common.gui.PathList;
+import com.minelittlepony.hdskins.common.gui.Widgets;
+import com.minelittlepony.hdskins.common.gui.element.Label;
+import com.minelittlepony.hdskins.common.gui.element.PlayerModelElement;
 import com.minelittlepony.hdskins.common.skins.Feature;
 import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
@@ -60,6 +64,10 @@ public class SkinUploadScreen extends CustomScreen {
 
     private ITextField textInput;
     private PathList pathList;
+    private PlayerModelElement entity;
+    private Label lblTitle;
+    private Label lblLocal;
+    private Label lblServer;
 
     public SkinUploadScreen(Uploader uploader, Function<Consumer<List<Path>>, FileDrop> dropper) {
         super("hdskins.gui.title");
@@ -113,41 +121,50 @@ public class SkinUploadScreen extends CustomScreen {
     }
 
     @Override
-    protected void init() {
+    protected void init(Widgets factory) {
         this.dropper.subscribe();
+        int entityWPos = screen.getWidth() / 2 - 60;
+        int entityXPos = screen.getWidth() - entityWPos;
+        entity = factory.addEntity(entityXPos - 30, 39, entityWPos, screen.getHeight() - 100);
 
-        screen.addLabel(screen.getWidth() / 2, 5, "hdskins.manager", -1, false, true);
-        screen.addLabel(34, 29, "hdskins.local");
-        screen.addLabel(screen.getWidth() / 2 + 34, 29, "hdskins.server");
+        lblTitle = new Label(screen.getTextRenderer(),
+                screen.getWidth() / 2, 5,
+                screen.translate("hdskins.manager"),
+                -1, false, true);
+        lblLocal = new Label(screen.getTextRenderer(),
+                34, 29, screen.translate("hdskins.local"));
+        lblServer = new Label(screen.getTextRenderer(),
+                screen.getWidth() / 2 + 34, 29,
+                screen.translate("hdskins.server"));
 
-        btnBrowse = screen.addButton(screen.getWidth() / 2 - 150, screen.getHeight() - 27, 90, 20,
+        btnBrowse = factory.addButton(screen.getWidth() / 2 - 150, screen.getHeight() - 27, 90, 20,
                 "hdskins.options.browse", null, this::browse);
-        btnUpload = screen.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 - 40, 48, 20,
+        btnUpload = factory.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 - 40, 48, 20,
                 "hdskins.options.upload", "hdskins.options.upload.title", this::upload);
-        btnDownload = screen.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 + 20, 48, 20,
+        btnDownload = factory.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 + 20, 48, 20,
                 "hdskins.options.download", "hdskins.options.download.title", this::download);
         btnDownload.setEnabled(false);
-        btnClear = screen.addButton(screen.getWidth() / 2 + 60, screen.getHeight() - 27, 90, 20,
+        btnClear = factory.addButton(screen.getWidth() / 2 + 60, screen.getHeight() - 27, 90, 20,
                 "hdskins.options.clear", this::clear);
 
-        screen.addButton(screen.getWidth() / 2 - 50, screen.getHeight() - 25, 100, 20,
+        factory.addButton(screen.getWidth() / 2 - 50, screen.getHeight() - 25, 100, 20,
                 "hdskins.options.close", null, b -> screen.close());
-        btnModeSteve = screen.addButtonIcon(screen.getWidth() - 25, 32,
-                String.format("leather_leggings{display:{color:%d}}", 0x3c5dcb),
+        btnModeSteve = factory.addButtonIcon(screen.getWidth() - 25, 32,
+                "player_head{SkullOwner:{Id:00000000-0000-0000-0000-000000000002}}",
                 "hdskins.mode.steve", this::setSteveMode);
-        btnModeAlex = screen.addButtonIcon(screen.getWidth() - 25, 51,
-                String.format("leather_leggings{display:{color:%d}}", 0xffff500),
+        btnModeAlex = factory.addButtonIcon(screen.getWidth() - 25, 51,
+                "player_head{SkullOwner:{Id:00000000-0000-0000-0000-000000000001}}",
                 "hdskins.mode.alex", this::setAlexMode);
 
-        btnModeSkin = screen.addButtonIcon(screen.getWidth() - 25, 75, "leather_chestplate",
+        btnModeSkin = factory.addButtonIcon(screen.getWidth() - 25, 75, "leather_chestplate",
                 "hdskins.mode.skin", this::setSkinMode);
-        btnModeElytra = screen.addButtonIcon(screen.getWidth() - 25, 94, "elytra",
+        btnModeElytra = factory.addButtonIcon(screen.getWidth() - 25, 94, "elytra",
                 "hdskins.mode.elytra", this::setElytraMode);
 
-        pathList = screen.addPathList(screen.getWidth() / 2 - 60, screen.getHeight(), 64, screen.getHeight() - 64);
-        pathList.setLeft(10);
+        pathList = factory.addPathList(screen.getWidth() / 2 - 60, screen.getHeight(), 64, screen.getHeight() - 64);
+        pathList.setLeft(30);
 
-        textInput = screen.addTextField(10, 40, screen.getWidth() / 2 - 60, 20, "");
+        textInput = factory.addTextField(30, 40, screen.getWidth() / 2 - 60, 20, "");
         textInput.setMaxContentLength(255);
         textInput.setCallback(navigator::setDirectory);
 
@@ -157,8 +174,13 @@ public class SkinUploadScreen extends CustomScreen {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        pathList.render(mouseX, mouseY, delta);
+    public void render(int mouseX, int mouseY, float delta, IGuiHelper gui) {
+        pathList.render(mouseX, mouseY, delta, gui);
+        entity.render(mouseX, mouseY, delta, gui);
+
+        lblTitle.render(mouseX, mouseY, delta, gui);
+        lblLocal.render(mouseX, mouseY, delta, gui);
+        lblServer.render(mouseX, mouseY, delta, gui);
     }
 
     private void setSkinMode(IButton iButton) {

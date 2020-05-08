@@ -1,23 +1,11 @@
 package com.minelittlepony.hdskins.common.gui;
 
+import com.minelittlepony.hdskins.common.gui.element.PlayerModelElement;
+
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public interface Widgets {
-
-    ILabel addLabel(int x, int y, String text, int color, boolean shadow, boolean centered);
-
-    default ILabel addLabel(int x, int y, String text, int color, boolean shadow) {
-        return addLabel(x, y, text, color, shadow, false);
-    }
-
-    default ILabel addLabel(int x, int y, String text, int color) {
-        return addLabel(x, y, text, color, false);
-    }
-
-    default ILabel addLabel(int x, int y, String text) {
-        return addLabel(x, y, text, -1);
-    }
 
     IButton addButton(int x, int y, int w, int h, String text, @Nullable String tooltip, Consumer<IButton> action);
 
@@ -34,4 +22,6 @@ public interface Widgets {
     ITextField addTextField(int x, int y, int w, int h, String text);
 
     PathList addPathList(int widthIn, int heightIn, int topIn, int bottomIn);
+
+    PlayerModelElement addEntity(int x, int y, int w, int h);
 }

@@ -1,49 +1,40 @@
 package com.minelittlepony.hdskins.forge.client.gui;
 
 import com.minelittlepony.hdskins.common.gui.IButton;
-import com.minelittlepony.hdskins.common.gui.ILabel;
 import com.minelittlepony.hdskins.common.gui.ITextField;
 import com.minelittlepony.hdskins.common.gui.PathList;
 import com.minelittlepony.hdskins.common.gui.Widgets;
+import com.minelittlepony.hdskins.common.gui.element.PlayerModelElement;
+import com.minelittlepony.hdskins.forge.client.entity.DummyPlayer;
+import com.minelittlepony.hdskins.forge.client.gui.widgets.MCPButton;
+import com.minelittlepony.hdskins.forge.client.gui.widgets.MCPButtonIcon;
+import com.minelittlepony.hdskins.forge.client.gui.widgets.MCPPathList;
+import com.minelittlepony.hdskins.forge.client.gui.widgets.MCPTextField;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.IRenderable;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class AbstractMCPWidgets implements IRenderable, Widgets {
-
-    private final List<IRenderable> draws = new ArrayList<>();
+public abstract class AbstractMCPWidgets implements Widgets {
 
     protected abstract FontRenderer getTextRenderer();
 
     protected abstract <B extends Widget> B addButton(B button);
 
     protected abstract List<IGuiEventListener> children();
-
-    @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        draws.forEach(d -> d.render(mouseX, mouseY, delta));
-    }
-
-    protected <T extends IRenderable> T addDraw(T draw) {
-        draws.add(draw);
-        return draw;
-    }
-
-    @Override
-    public ILabel addLabel(int x, int y, String text, int color, boolean shadow, boolean centered) {
-        return addDraw(new MCPLabel(getTextRenderer(), x, y, text, color, shadow, centered));
-    }
 
     @Override
     public IButton addButton(int x, int y, int w, int h, String text, @Nullable String tooltip, Consumer<IButton> action) {
@@ -70,5 +61,15 @@ public abstract class AbstractMCPWidgets implements IRenderable, Widgets {
         MCPPathList list = new MCPPathList(Minecraft.getInstance(), widthIn, heightIn, topIn, bottomIn);
         children().add(list);
         return list;
+    }
+
+    @Override
+    public PlayerModelElement addEntity(int x, int y, int w, int h) {
+        WorldSettings settings = new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT);
+        ClientWorld world = new ClientWorld(null, settings, DimensionType.OVERWORLD, 0, null, Minecraft.getInstance().worldRenderer);
+        GuiPlayerEntityRenderer widget = new GuiPlayerEntityRenderer(new DummyPlayer(world, Minecraft.getInstance().getSession().getProfile()));
+        PlayerModelElement player = new PlayerModelElement(x, y, w, h, widget);
+        children().add(new GuiListenerAdapter(player));
+        return player;
     }
 }

@@ -1,13 +1,14 @@
-package com.minelittlepony.hdskins.forge.client.gui;
+package com.minelittlepony.hdskins.forge.client.gui.widgets;
 
 import com.minelittlepony.hdskins.common.gui.PathList;
+import com.minelittlepony.hdskins.forge.client.gui.IRenderAdapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.list.ExtendedList;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class MCPPathList extends ExtendedList<MCPPathList.PathEntry> implements PathList {
+public class MCPPathList extends ExtendedList<MCPPathList.PathEntry> implements PathList, IRenderAdapter {
 
     public MCPPathList(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn) {
         super(mcIn, widthIn, heightIn, topIn, bottomIn, 12);
