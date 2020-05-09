@@ -5,7 +5,9 @@
   "name": "HD Skins",
   "description": "Faster, stronger, more res skin servers for Minecraft. Access via the main menu.",
   "authors": [
-    "Mumfrey", "Killjoy1221", "Sollace"
+    "Mumfrey",
+    "Killjoy1221",
+    "Sollace"
   ],
   "contact": {
     "homepage": "https://minelittlepony-mod.com/",
@@ -21,6 +23,9 @@
     ],
     "client": [
       "com.minelittlepony.hdskins.fabric.client.HDSkinsClient"
+    ],
+    "modmenu": [
+      "com.minelittlepony.hdskins.fabric.client.modmenu.HDSkinsMenuFactory"
     ]
   },
   "mixins": [

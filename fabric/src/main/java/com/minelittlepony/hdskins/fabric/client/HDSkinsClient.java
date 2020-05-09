@@ -162,14 +162,18 @@ public class HDSkinsClient implements ClientModInitializer {
     private void onScreenInit(Screen screen, Consumer<AbstractButtonWidget> addButton) {
         if (screen instanceof TitleScreen) {
             addButton.accept(new ButtonWidget(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
-                MinecraftClient mc = MinecraftClient.getInstance();
-                mc.openScreen(new YarnScreenWrapper(new SkinUploadScreen(
-                        new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
-                                sessionFromVanilla(mc.getSession()), mc.getSessionService()),
-                        (a) -> new FileDrop(mc, mc.getWindow()::getHandle, a)
-                )));
+                MinecraftClient.getInstance().openScreen(createSkinUpload(screen));
             }));
         }
+    }
+
+    public static Screen createSkinUpload(Screen parent) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        return new YarnScreenWrapper(parent, new SkinUploadScreen(
+                new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
+                        sessionFromVanilla(mc.getSession()), mc.getSessionService()),
+                (a) -> new FileDrop(mc, mc.getWindow()::getHandle, a)
+        ));
     }
 
     private static Session sessionFromVanilla(net.minecraft.client.util.Session session) {

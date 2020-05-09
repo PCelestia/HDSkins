@@ -157,14 +157,18 @@ public class HDSkinsClient {
         if (event.getGui() instanceof MainMenuScreen) {
             Screen screen = event.getGui();
             event.addWidget(new Button(screen.width - 25, screen.height - 50, 20, 20, "S", b -> {
-                Minecraft mc = Minecraft.getInstance();
-                mc.displayGuiScreen(new MCPScreenWrapper(new SkinUploadScreen(
-                        new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
-                                sessionFromVanilla(mc.getSession()), mc.getSessionService()),
-                        (a) -> new FileDrop(mc, mc.getMainWindow()::getHandle, a)
-                )));
+                Minecraft.getInstance().displayGuiScreen(createSkinsUpload(screen));
             }));
         }
+    }
+
+    public static Screen createSkinsUpload(Screen parent) {
+        Minecraft mc = Minecraft.getInstance();
+        return new MCPScreenWrapper(parent, new SkinUploadScreen(
+                new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
+                        sessionFromVanilla(mc.getSession()), mc.getSessionService()),
+                (a) -> new FileDrop(mc, mc.getMainWindow()::getHandle, a)
+        ));
     }
 
     private static Session sessionFromVanilla(net.minecraft.util.Session session) {

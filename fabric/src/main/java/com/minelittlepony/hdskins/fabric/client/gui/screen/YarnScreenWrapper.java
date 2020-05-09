@@ -1,7 +1,6 @@
 package com.minelittlepony.hdskins.fabric.client.gui.screen;
 
 import com.minelittlepony.hdskins.common.gui.IGuiHelper;
-import com.minelittlepony.hdskins.common.gui.IScreen;
 import com.minelittlepony.hdskins.common.gui.ITextRenderer;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.fabric.client.gui.AbstractYarnWidgets;
@@ -9,22 +8,23 @@ import com.minelittlepony.hdskins.fabric.client.gui.GuiHelperAdapter;
 import com.minelittlepony.hdskins.fabric.client.gui.YarnScreenAdapter;
 import com.minelittlepony.hdskins.fabric.client.gui.YarnTextAdapter;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableText;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class YarnScreenWrapper extends Screen {
 
+    protected final Screen parent;
     protected final CustomScreen screen;
     private final IGuiHelper gui = new GuiHelperAdapter(this);
 
-    public YarnScreenWrapper(CustomScreen screen) {
+    public YarnScreenWrapper(@Nullable Screen parent, CustomScreen screen) {
         super(new TranslatableText(screen.getTitle()));
+        this.parent = parent;
         this.screen = screen;
     }
 
@@ -54,6 +54,11 @@ public class YarnScreenWrapper extends Screen {
     @Override
     public void removed() {
         screen.removed();
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.openScreen(parent);
     }
 
     protected class YarnScreen extends YarnScreenAdapter {

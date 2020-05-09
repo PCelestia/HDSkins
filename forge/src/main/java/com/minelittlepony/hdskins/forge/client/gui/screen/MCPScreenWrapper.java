@@ -1,7 +1,6 @@
 package com.minelittlepony.hdskins.forge.client.gui.screen;
 
 import com.minelittlepony.hdskins.common.gui.IGuiHelper;
-import com.minelittlepony.hdskins.common.gui.IScreen;
 import com.minelittlepony.hdskins.common.gui.ITextRenderer;
 import com.minelittlepony.hdskins.common.gui.screen.CustomScreen;
 import com.minelittlepony.hdskins.forge.client.gui.AbstractMCPWidgets;
@@ -14,15 +13,18 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class MCPScreenWrapper extends Screen {
-
+    @Nullable
+    protected final Screen parent;
     protected final CustomScreen screen;
     private final IGuiHelper gui = new GuiHelperAdapter(this);
 
-    public MCPScreenWrapper(CustomScreen screen) {
+    public MCPScreenWrapper(@Nullable Screen parent, CustomScreen screen) {
         super(new TranslationTextComponent(screen.getTitle()));
+        this.parent = parent;
         this.screen = screen;
     }
 
@@ -52,6 +54,11 @@ public class MCPScreenWrapper extends Screen {
     @Override
     public void removed() {
         screen.removed();
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.displayGuiScreen(parent);
     }
 
     protected class SrgScreen extends MCPScreenAdapter {

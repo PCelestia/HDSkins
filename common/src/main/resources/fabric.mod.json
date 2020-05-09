@@ -2,5 +2,11 @@
   "schemaVersion": 1,
   "id": "hdskins_common_dev",
   "version": "1",
-  "name": "HD Skins"
+  "name": "HD Skins Common",
+  "description": "Common assets and sources for HDSkins development.\nBinaries work with both forge and fabric.",
+  "custom": {
+    "modmenu:api": true,
+    "modmenu:parent": "hdskins",
+    "modmenu:clientsideOnly": true
+  }
 }
