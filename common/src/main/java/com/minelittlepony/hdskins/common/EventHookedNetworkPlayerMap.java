@@ -4,13 +4,16 @@ import com.google.common.collect.ForwardingMap;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-public abstract class EventHookedNetworkPlayerMap<T> extends ForwardingMap<UUID, T> {
+public class EventHookedNetworkPlayerMap<T> extends ForwardingMap<UUID, T> {
 
     private final Map<UUID, T> delegate;
+    private final Consumer<T> callback;
 
-    public EventHookedNetworkPlayerMap(Map<UUID, T> delegate) {
+    public EventHookedNetworkPlayerMap(Map<UUID, T> delegate, Consumer<T> callback) {
         this.delegate = delegate;
+        this.callback = callback;
     }
 
     @Override
@@ -20,9 +23,7 @@ public abstract class EventHookedNetworkPlayerMap<T> extends ForwardingMap<UUID,
 
     @Override
     public T put(UUID key, T value) {
-        this.firePutEvent(value);
+        this.callback.accept(value);
         return super.put(key, value);
     }
-
-    protected abstract void firePutEvent(T value);
 }

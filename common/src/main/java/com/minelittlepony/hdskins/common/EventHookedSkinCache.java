@@ -1,6 +1,7 @@
 package com.minelittlepony.hdskins.common;
 
 import com.google.common.cache.ForwardingLoadingCache;
+import com.google.common.cache.LoadingCache;
 import com.minelittlepony.hdskins.common.skins.SkinCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -12,12 +13,19 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public abstract class EventHookedSkinCache extends ForwardingLoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> {
+public class EventHookedSkinCache extends ForwardingLoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> {
 
+    private final LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate;
     private final Supplier<SkinCache> skinCache;
 
-    protected EventHookedSkinCache(Supplier<SkinCache> skinServerList) {
+    public EventHookedSkinCache(LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate, Supplier<SkinCache> skinServerList) {
+        this.delegate = delegate;
         this.skinCache = skinServerList;
+    }
+
+    @Override
+    protected LoadingCache<GameProfile, Map<Type, MinecraftProfileTexture>> delegate() {
+        return delegate;
     }
 
     @Override

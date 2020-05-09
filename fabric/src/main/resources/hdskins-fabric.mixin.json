@@ -6,7 +6,6 @@
     "compatibilityLevel": "JAVA_8",
     "client": [
         "client.IMixinPlayerListEntry",
-        "client.IMixinPlayerSkinProvider",
         "client.MixinClientPlayNetworkHandler",
         "client.MixinPlayerSkinTexture",
         "client.MixinScreen"
