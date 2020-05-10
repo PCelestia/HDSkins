@@ -8,8 +8,8 @@ import com.google.gson.JsonObject;
 import com.minelittlepony.hdskins.common.skins.Feature;
 import com.minelittlepony.hdskins.common.skins.RequestHelper;
 import com.minelittlepony.hdskins.common.skins.Session;
-import com.minelittlepony.hdskins.common.skins.SkinServer;
 import com.minelittlepony.hdskins.common.skins.SkinRequest;
+import com.minelittlepony.hdskins.common.skins.SkinServer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -18,6 +18,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.response.MinecraftTexturesPayload;
 import com.mojang.util.UUIDTypeAdapter;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -29,6 +30,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +71,9 @@ class ValhallaSkinServer implements SkinServer {
                 MinecraftTexturesPayload payload = response.json(GSON, MinecraftTexturesPayload.class);
                 return payload.getTextures();
             }
+            if (response.responseCode() == HttpStatus.SC_NOT_FOUND) {
+                return Collections.emptyMap();
+            }
             throw new IOException(getErrorMessage(response));
         }
     }
@@ -77,13 +82,9 @@ class ValhallaSkinServer implements SkinServer {
     public void performSkinUpload(MinecraftSessionService sessionService, SkinRequest upload) throws IOException, AuthenticationException {
         try {
             uploadPlayerSkin(sessionService, upload);
-        } catch (IOException e) {
-            if (e.getMessage().equals("Authorization failed")) {
-                accessToken = null;
-                uploadPlayerSkin(sessionService, upload);
-            }
-
-            throw e;
+        } catch (AuthenticationException e) {
+            accessToken = null;
+            uploadPlayerSkin(sessionService, upload);
         }
     }
 
@@ -111,14 +112,14 @@ class ValhallaSkinServer implements SkinServer {
         }
     }
 
-    private void resetSkin(SkinRequest upload) throws IOException {
+    private void resetSkin(SkinRequest upload) throws IOException, AuthenticationException {
         upload(RequestBuilder.delete()
                 .setUri(buildUserTextureUri(upload))
                 .addHeader(HttpHeaders.AUTHORIZATION, this.accessToken)
                 .build());
     }
 
-    private void uploadFile(SkinRequest.Upload upload) throws IOException {
+    private void uploadFile(SkinRequest.Upload upload) throws IOException, AuthenticationException {
         final File file = new File(upload.getImage());
 
         MultipartEntityBuilder b = MultipartEntityBuilder.create()
@@ -133,7 +134,7 @@ class ValhallaSkinServer implements SkinServer {
                 .build());
     }
 
-    private void uploadUrl(SkinRequest.Upload upload) throws IOException {
+    private void uploadUrl(SkinRequest.Upload upload) throws IOException , AuthenticationException{
         upload(RequestBuilder.post()
                 .setUri(buildUserTextureUri(upload))
                 .addHeader(HttpHeaders.AUTHORIZATION, this.accessToken)
@@ -148,10 +149,15 @@ class ValhallaSkinServer implements SkinServer {
                 .toArray(NameValuePair[]::new);
     }
 
-    private void upload(HttpUriRequest request) throws IOException {
+    private void upload(HttpUriRequest request) throws IOException, AuthenticationException {
         try (RequestHelper response = RequestHelper.execute(HTTP_CLIENT, request)) {
             if (!response.ok()) {
-                throw new IOException(response.json(GSON, JsonObject.class).get("message").getAsString());
+                String message = response.json(GSON, JsonObject.class).get("message").getAsString();
+                int code = response.responseCode();
+                if (code == HttpStatus.SC_UNAUTHORIZED || code == HttpStatus.SC_FORBIDDEN) {
+                    throw new AuthenticationException(message);
+                }
+                throw new IOException(message);
             }
         }
     }
