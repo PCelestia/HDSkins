@@ -8,24 +8,27 @@ import java.util.Optional;
 @SuppressWarnings("unchecked")
 class LoaderAgnosticInstance {
 
+    private static final String MOD_ID = IHDSkins.MOD_ID;
+    private static final Class<?> MOD_CLASS = IHDSkins.class;
+
     private static Object instance;
 
-    static <T> T getInstance(String modId, Class<T> type) {
+    static Object getInstance() {
         if (instance == null) {
-            instance = findInstance(modId, type);
+            instance = findInstance();
         }
 
-        return (T) instance;
+        return instance;
     }
 
-    private static Object findInstance(String modId, Class<?> type) {
+    private static Object findInstance() {
 
         Throwable forgeException;
         Throwable fabricException;
 
         // try first with forge. It's the simplest.
         try {
-            return findForge(modId);
+            return findForge();
         } catch (ClassNotFoundException t) {
             forgeException = t;
         }
@@ -33,20 +36,20 @@ class LoaderAgnosticInstance {
         // I guess forge isn't installed. Maybe Fabric is being used.
         // Here we go!
         try {
-            return findFabric(modId, type);
+            return findFabric();
         } catch (ClassNotFoundException t) {
             fabricException = t;
         }
 
         // Something went terribly wrong
-        RuntimeException t = new RuntimeException("Could not find instance of '" + modId + "'. This probably indicates a bug.");
+        RuntimeException t = new RuntimeException("Could not find instance of '" + IHDSkins.MOD_ID + "'. This probably indicates a bug.");
         t.addSuppressed(forgeException);
         t.addSuppressed(fabricException);
         throw t;
     }
 
 
-    private static Object findForge(String modId) throws ClassNotFoundException {
+    private static Object findForge() throws ClassNotFoundException {
         Class<?> ModList = Class.forName("net.minecraftforge.fml.ModList");
         // try forge first.
         try {
@@ -57,7 +60,7 @@ class LoaderAgnosticInstance {
             Object modList = ModList_get.invoke(null);
 
             // Optional<T> mod = modList.getModObjectById(modId);
-            Optional<Object> mod = (Optional<Object>) ModList_getModObjectById.invoke(modList, modId);
+            Optional<Object> mod = (Optional<Object>) ModList_getModObjectById.invoke(modList, MOD_ID);
 
             return mod.orElseThrow(() -> new IllegalStateException("Mod is not loaded?"));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException t) {
@@ -65,7 +68,7 @@ class LoaderAgnosticInstance {
         }
     }
 
-    private static Object findFabric(String modId, Class<?> type) throws ClassNotFoundException {
+    private static Object findFabric() throws ClassNotFoundException {
         Class<?> FabricLoader = Class.forName("net.fabricmc.loader.api.FabricLoader");
         try {
             Class<?> ModInitializer = Class.forName("net.fabricmc.api.ModInitializer");
@@ -96,16 +99,16 @@ class LoaderAgnosticInstance {
                 // String id = metadata.getId();
                 String id = (String) ModMetadata_getId.invoke(modMetadata);
 
-                if (id.equals(modId)) {
+                if (id.equals(MOD_ID)) {
                     // Object mod = container.getEntrypoint();
                     Object mod = EntrypointContainer_getEntrypoint.invoke(container);
-                    if (type.isInstance(mod)) {
+                    if (MOD_CLASS.isInstance(mod)) {
                         return mod;
                     }
                 }
             }
 
-            throw new IllegalStateException("Mod with id " + modId + " did not have a main entrypoint.");
+            throw new IllegalStateException("Mod with id " + MOD_ID + " did not have a main entrypoint.");
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException t) {
             throw new RuntimeException("Failed to load fabric mod. Did something internal change?", t);
         }

@@ -6,7 +6,7 @@ public interface IHDSkins {
     String MOD_ID = "hdskins";
 
     static IHDSkins instance() {
-        return LoaderAgnosticInstance.getInstance(MOD_ID, IHDSkins.class);
+        return (IHDSkins) LoaderAgnosticInstance.getInstance();
     }
 
     SkinServerList getSkinServers();
