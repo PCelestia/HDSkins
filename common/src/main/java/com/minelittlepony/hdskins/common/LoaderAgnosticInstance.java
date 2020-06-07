@@ -23,9 +23,33 @@ class LoaderAgnosticInstance {
         Throwable forgeException;
         Throwable fabricException;
 
+        // try first with forge. It's the simplest.
+        try {
+            return findForge(modId);
+        } catch (ClassNotFoundException t) {
+            forgeException = t;
+        }
+
+        // I guess forge isn't installed. Maybe Fabric is being used.
+        // Here we go!
+        try {
+            return findFabric(modId, type);
+        } catch (ClassNotFoundException t) {
+            fabricException = t;
+        }
+
+        // Something went terribly wrong
+        RuntimeException t = new RuntimeException("Could not find instance of '" + modId + "'. This probably indicates a bug.");
+        t.addSuppressed(forgeException);
+        t.addSuppressed(fabricException);
+        throw t;
+    }
+
+
+    private static Object findForge(String modId) throws ClassNotFoundException {
+        Class<?> ModList = Class.forName("net.minecraftforge.fml.ModList");
         // try forge first.
         try {
-            Class<?> ModList = Class.forName("net.minecraftforge.fml.ModList");
             Method ModList_get = ModList.getMethod("get");
             Method ModList_getModObjectById = ModList.getMethod("getModObjectById", String.class);
 
@@ -36,15 +60,16 @@ class LoaderAgnosticInstance {
             Optional<Object> mod = (Optional<Object>) ModList_getModObjectById.invoke(modList, modId);
 
             return mod.orElseThrow(() -> new IllegalStateException("Mod is not loaded?"));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException t) {
-            forgeException = t;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException t) {
+            throw new RuntimeException("Failed to load forge mod. Did something internal change?", t);
         }
+    }
 
-        // I guess forge isn't installed. Maybe Fabric is being used.
-        // Here we go!
+    private static Object findFabric(String modId, Class<?> type) throws ClassNotFoundException {
+        Class<?> FabricLoader = Class.forName("net.fabricmc.loader.api.FabricLoader");
         try {
-            Class<?> FabricLoader = Class.forName("net.fabricmc.loader.api.FabricLoader");
             Class<?> ModInitializer = Class.forName("net.fabricmc.api.ModInitializer");
+            // requires fabric-loader 0.8+
             Class<?> EntrypointContainer = Class.forName("net.fabricmc.loader.api.entrypoint.EntrypointContainer");
             Class<?> ModContainer = Class.forName("net.fabricmc.loader.api.ModContainer");
             Class<?> ModMetadata = Class.forName("net.fabricmc.loader.api.metadata.ModMetadata");
@@ -82,14 +107,8 @@ class LoaderAgnosticInstance {
 
             throw new IllegalStateException("Mod with id " + modId + " did not have a main entrypoint.");
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException t) {
-            fabricException = t;
+            throw new RuntimeException("Failed to load fabric mod. Did something internal change?", t);
         }
 
-        // Something went terribly wrong
-
-        RuntimeException t = new RuntimeException("Could not find instance of '" + modId + "'. This probably indicates a bug.");
-        t.addSuppressed(forgeException);
-        t.addSuppressed(fabricException);
-        throw t;
     }
 }
