@@ -39,6 +39,7 @@ public class Uploader {
         skinMetadata.put("model", "default");
     }
 
+    @Nullable
     public SkinServer getGateway() {
         return gateway;
     }

@@ -11,19 +11,30 @@ import com.minelittlepony.hdskins.common.gui.Widgets;
 import com.minelittlepony.hdskins.common.gui.element.Label;
 import com.minelittlepony.hdskins.common.gui.element.PlayerModelElement;
 import com.minelittlepony.hdskins.common.skins.Feature;
+import com.minelittlepony.hdskins.common.skins.Session;
+import com.minelittlepony.hdskins.common.skins.SkinServer;
+import com.minelittlepony.hdskins.common.skins.SkinServerList;
 import com.minelittlepony.hdskins.common.upload.Uploader;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import org.apache.logging.log4j.LogManager;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,10 +59,19 @@ public class SkinUploadScreen extends CustomScreen {
         }
     };
 
-    private Path currentDirectory;
+    private final Uploader uploader;
 
+    private Path currentDirectory;
+    private final Iterator<SkinServer> skins;
+    private final Executor textureThread;
+    private final MinecraftSessionService sessionService;
+    private final Session session;
     private final FileDrop dropper;
-    private Uploader uploader;
+
+    @Nullable
+    private SkinServer currentServer;
+
+    private Map<Type, MinecraftProfileTexture> payload = Collections.emptyMap();
 
     private IButton btnBrowse;
     private IButton btnUpload;
@@ -65,15 +85,51 @@ public class SkinUploadScreen extends CustomScreen {
     private ITextField textInput;
     private PathList pathList;
     private PlayerModelElement entity;
+
     private Label lblTitle;
     private Label lblLocal;
     private Label lblServer;
 
-    public SkinUploadScreen(Uploader uploader, Function<Consumer<List<Path>>, FileDrop> dropper) {
+    public SkinUploadScreen(SkinServerList skins, Executor textureThread,
+                            MinecraftSessionService sessionService, Session session,
+                            Function<Consumer<List<Path>>, FileDrop> dropper) {
         super("hdskins.gui.title");
-        this.uploader = uploader;
+        this.skins = skins.getCycler();
+        this.textureThread = textureThread;
+        this.sessionService = sessionService;
+        this.session = session;
         this.dropper = dropper.apply(this::onDrop);
-        currentDirectory = Paths.get(".");
+        this.currentDirectory = Paths.get(".");
+
+        this.uploader = new Uploader(null, session, sessionService);
+        nextServer();
+    }
+
+    private void nextServer() {
+        currentServer = skins.hasNext() ? skins.next() : null;
+        this.uploader.setGateway(currentServer);
+
+        if (this.currentServer != null) {
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return this.currentServer.loadProfileData(sessionService, session.getProfile());
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }).thenAcceptAsync(this::refreshPayload, this.textureThread);
+        }
+    }
+
+    private void refreshPayload(@Nullable Map<Type, MinecraftProfileTexture> payload) {
+        if (payload == null) {
+            payload = Collections.emptyMap();
+        }
+        this.payload = payload;
+        refreshPayload();
+    }
+
+    private void refreshPayload() {
+        this.entity.getPlayer().loadSkins(this.payload);
     }
 
     private Predicate<Path> filterHidden() {
@@ -117,7 +173,8 @@ public class SkinUploadScreen extends CustomScreen {
     }
 
     private void onSelect(Path path) {
-        System.out.println(path);
+        this.entity.setTexture(uploader.getSkinType(), path);
+        this.uploader.setLocalSkin(path.toUri());
     }
 
     @Override
@@ -137,15 +194,18 @@ public class SkinUploadScreen extends CustomScreen {
                 screen.getWidth() / 2 + 34, 29,
                 screen.translate("hdskins.server"));
 
-        btnBrowse = factory.addButton(screen.getWidth() / 2 - 150, screen.getHeight() - 27, 90, 20,
-                "hdskins.options.browse", null, this::browse);
-        btnUpload = factory.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 - 40, 48, 20,
+//        btnBrowse = factory.addButton(screen.getWidth() / 2 - 150, screen.getHeight() - 27, 90, 20,
+//                "hdskins.options.browse", null, this::browse);
+        btnUpload = factory.addButton(screen.getWidth() / 2 - 12, screen.getHeight() / 2 - 40, 24, 20,
                 "hdskins.options.upload", "hdskins.options.upload.title", this::upload);
-        btnDownload = factory.addButton(screen.getWidth() / 2 - 24, screen.getHeight() / 2 + 20, 48, 20,
+        btnClear = factory.addButton(screen.getWidth() / 2 - 12, screen.getHeight() / 2 - 10, 24, 20,
+                "hdskins.options.clear", "hdskins.options.clear.title", this::clear);
+        btnClear.setEnabled(false);
+        btnDownload = factory.addButton(screen.getWidth() / 2 - 12, screen.getHeight() / 2 + 20, 24, 20,
                 "hdskins.options.download", "hdskins.options.download.title", this::download);
         btnDownload.setEnabled(false);
-        btnClear = factory.addButton(screen.getWidth() / 2 + 60, screen.getHeight() - 27, 90, 20,
-                "hdskins.options.clear", this::clear);
+//        btnClear = factory.addButton(screen.getWidth() / 2 + 60, screen.getHeight() - 27, 90, 20,
+//                "hdskins.options.clear", this::clear);
 
         factory.addButton(screen.getWidth() / 2 - 50, screen.getHeight() - 25, 100, 20,
                 "hdskins.options.close", null, b -> screen.close());
@@ -230,6 +290,7 @@ public class SkinUploadScreen extends CustomScreen {
     @Override
     public void removed() {
         this.dropper.close();
+        this.entity.close();
     }
 
     private void punchServer(String message) {

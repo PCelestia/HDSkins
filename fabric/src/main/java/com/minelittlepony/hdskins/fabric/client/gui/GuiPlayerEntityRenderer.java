@@ -1,21 +1,41 @@
 package com.minelittlepony.hdskins.fabric.client.gui;
 
+import com.minelittlepony.hdskins.common.IHDSkins;
 import com.minelittlepony.hdskins.common.gui.AbstractPlayerEntityRenderer;
+import com.minelittlepony.hdskins.fabric.client.HDPlayerSkinTexture;
+import com.minelittlepony.hdskins.fabric.client.HDSkinsClient;
+import com.minelittlepony.hdskins.fabric.client.IPlayerSkinTextureAccessors;
+import com.minelittlepony.hdskins.fabric.client.entity.DummyPlayer;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.texture.PlayerSkinTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Quaternion;
+import org.apache.logging.log4j.LogManager;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 public class GuiPlayerEntityRenderer extends AbstractPlayerEntityRenderer {
 
-    private final LivingEntity entity;
+    private final Map<MinecraftProfileTexture.Type, NativeImageBackedTexture> textures = new HashMap<>();
+    private final DummyPlayer entity;
 
-    public GuiPlayerEntityRenderer(LivingEntity entity) {
+    public GuiPlayerEntityRenderer(DummyPlayer entity) {
         this.entity = entity;
     }
 
@@ -51,5 +71,54 @@ public class GuiPlayerEntityRenderer extends AbstractPlayerEntityRenderer {
         irendertypebuffer$impl.draw();
         entityrenderermanager.setRenderShadows(true);
         RenderSystem.popMatrix();
+    }
+
+    @Override
+    public void loadSkins(Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures) {
+        RenderSystem.recordRenderCall(() -> {
+            entity.resetSkins();
+            for (MinecraftProfileTexture.Type textureType : MinecraftProfileTexture.Type.values()) {
+                if (textures.containsKey(textureType)) {
+                    MinecraftProfileTexture texture = textures.get(textureType);
+                    HDSkinsClient.loadSkin(texture, textureType, entity::loadSkins);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void loadTexture(MinecraftProfileTexture.Type skinType, Path path) {
+        Identifier location = new Identifier(IHDSkins.MOD_ID, "skin_preview/" + skinType.name().toLowerCase(Locale.ROOT));
+
+        RenderSystem.recordRenderCall(() -> {
+            try (InputStream input = Files.newInputStream(path)) {
+
+                HDPlayerSkinTexture texture = new HDPlayerSkinTexture((IPlayerSkinTextureAccessors) new PlayerSkinTexture(null, "", location, skinType == MinecraftProfileTexture.Type.SKIN, null));
+                NativeImage image = Objects.requireNonNull(texture.loadTextureOverride(input));
+                NativeImageBackedTexture tex = textures.compute(skinType, (k, v) -> {
+                    if (v == null) {
+                        return new NativeImageBackedTexture(image);
+                    }
+                    try {
+                        v.setImage(image);
+                        v.upload();
+                    } catch (Exception e) {
+                        // will probably never happen. The method declared throws, but never throws.
+                        LogManager.getLogger().error(e);
+                    }
+                    return v;
+                });
+                MinecraftClient.getInstance().getTextureManager().registerTexture(location, tex);
+                entity.setTexture(skinType, location);
+            } catch (IOException e) {
+                LogManager.getLogger().error(e);
+            }
+        });
+    }
+
+    @Override
+    public void close() {
+        textures.values().forEach(NativeImageBackedTexture::close);
+        textures.clear();
     }
 }

@@ -1,11 +1,15 @@
 package com.minelittlepony.hdskins.common.gui.element;
 
-import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.AbstractPlayerEntityRenderer;
+import com.minelittlepony.hdskins.common.gui.IGuiHelper;
 import com.minelittlepony.hdskins.common.gui.IRender;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import org.lwjgl.glfw.GLFW;
 
-public class PlayerModelElement extends CustomElement implements IRender {
+import java.io.Closeable;
+import java.nio.file.Path;
+
+public class PlayerModelElement extends CustomElement implements IRender, Closeable {
     private final int xPos;
     private final int yPos;
     private final int width;
@@ -23,6 +27,19 @@ public class PlayerModelElement extends CustomElement implements IRender {
         this.width = width;
         this.height = height;
         this.player = player;
+    }
+
+    public AbstractPlayerEntityRenderer getPlayer() {
+        return player;
+    }
+
+    public void setTexture(MinecraftProfileTexture.Type skinType, Path path) {
+        player.loadTexture(skinType, path);
+    }
+
+    @Override
+    public void close() {
+        player.close();
     }
 
     @Override

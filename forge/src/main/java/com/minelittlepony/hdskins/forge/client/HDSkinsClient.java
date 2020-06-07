@@ -7,7 +7,6 @@ import com.minelittlepony.hdskins.common.ObfHelper;
 import com.minelittlepony.hdskins.common.file.FileDrop;
 import com.minelittlepony.hdskins.common.gui.screen.SkinUploadScreen;
 import com.minelittlepony.hdskins.common.skins.Session;
-import com.minelittlepony.hdskins.common.upload.Uploader;
 import com.minelittlepony.hdskins.forge.ForgeObfHelper;
 import com.minelittlepony.hdskins.forge.client.gui.screen.MCPScreenWrapper;
 import com.mojang.authlib.GameProfile;
@@ -37,7 +36,6 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class HDSkinsClient extends HDSkinsClientEvents<
@@ -89,9 +87,11 @@ public class HDSkinsClient extends HDSkinsClientEvents<
 
     public static Screen createSkinsUpload(Screen parent) {
         Minecraft mc = Minecraft.getInstance();
+
         return new MCPScreenWrapper(parent, new SkinUploadScreen(
-                new Uploader(IHDSkins.instance().getSkinServers().getSkinServers().get(0),
-                        sessionFromVanilla(mc.getSession()), mc.getSessionService()),
+                IHDSkins.instance().getSkinServers(), mc,
+                mc.getSessionService(), sessionFromVanilla(mc.getSession()),
+
                 (a) -> new FileDrop(mc, mc.getMainWindow()::getHandle, a)
         ));
     }
@@ -118,21 +118,20 @@ public class HDSkinsClient extends HDSkinsClientEvents<
 
     private void loadSkins(NetworkPlayerInfo player, Map<Type, MinecraftProfileTexture> textures) {
         RenderSystem.recordRenderCall(() -> {
+            SkinManager.ISkinAvailableCallback callback = (type, location, texture) -> addPendingSkin(new PendingSkin(player, type, location, texture));
             for (Type textureType : Type.values()) {
                 if (textures.containsKey(textureType)) {
-                    MinecraftProfileTexture texture = textures.get(textureType);
-                    loadSkin(texture, textureType, location -> addPendingSkin(new PendingSkin(player, textureType, location, texture)));
+                    loadSkin(textures.get(textureType), textureType, callback);
                 }
             }
         });
     }
 
-    private void loadSkin(MinecraftProfileTexture profileTexture, Type textureType, @Nullable Consumer<ResourceLocation> callback) {
-
+    public static void loadSkin(MinecraftProfileTexture profileTexture, Type textureType, @Nullable SkinManager.ISkinAvailableCallback callback) {
         SkinManager skins = Minecraft.getInstance().getSkinManager();
         skins.loadSkin(profileTexture, textureType, (type, location, texture) -> {
             if (callback != null) {
-                callback.accept(location);
+                callback.onSkinTextureAvailable(textureType, location, profileTexture);
             }
         });
     }
