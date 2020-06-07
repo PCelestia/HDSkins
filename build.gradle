@@ -17,6 +17,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 subprojects {
     apply plugin: 'java-library'
@@ -36,6 +37,15 @@ if (release.toUpperCase() != "RELEASE")
 description = project.displayname
 
 evaluationDependsOnChildren()
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compile "org.apache.httpcomponents:httpmime:4.3.2"
+}
 
 sourceSets {
     old {
@@ -65,4 +75,55 @@ jar {
             "Implementation-Vendor": "MineLittlePony",
             "Implementation-Timestamp": new Date()
     )
+}
+
+task commonJar(type: Jar) {
+    archiveClassifier = 'common'
+
+    dependsOn project("common").jar
+    from(zipTree(project("common").jar.outputs.files.singleFile)) {
+        exclude 'fabric.mod.json'
+    }
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from project('common').sourceSets.main.java
+    from project('fabric').sourceSets.main.java
+    from project('forge').sourceSets.main.java
+}
+
+artifacts {
+    archives commonJar, sourcesJar
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact commonJar
+            pom {
+                name = "HDSkins"
+                description = "HD Skins support for Minecraft"
+                url = "https://minelittlepony-mod.com"
+
+                licenses {
+                    license {
+                        name = "MIT Public License"
+                        url = "https://tlo.mit.edu/learn-about-intellectual-property/software-and-open-source-licensing"
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/MineLittlePony/HDSkins.git'
+                    developerConnection = 'scm:git:ssh://github.com/MineLittlePony/HDSkins.git'
+                    url = 'https://github.com/MineLittlePony/HDSkins'
+                }
+            }
+        }
+
+    }
+    repositories {
+        mavenLocal()
+    }
 }
